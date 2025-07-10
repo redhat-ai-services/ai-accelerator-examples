@@ -8,4 +8,3 @@ patches:
   - path: patch-example-applicationset.yaml
     target:
       kind: ApplicationSet
-      name: tenants
