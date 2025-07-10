@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: vllm-modelcar-serverless-example
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  generators:
+  - git:
+      repoURL: 'https://github.com/redhat-ai-services/ai-accelerator-examples.git'  # Update me on fork
+      revision: main
+      directories:
+      - path: examples/vllm-modelcar-serverless/*/overlays/patch-me-see-overlay
+      - path: examples/vllm-modelcar-serverless/argocd/*
+        ignore: true
+  template:
+    metadata:
+      name: '{{path[2]}}-{{path[3]}}'
+      annotations:
+        argocd.argoproj.io/compare-options: IgnoreExtraneous
+        argocd.argoproj.io/sync-options: Prune=false
+      labels:
+        example: '{{path[2]}}'
+    spec:
+      project: vllm-modelcar-serverless
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        retry:
+          limit: 5
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 20m
+      source:
+        repoURL: patch-me-see-clusters-overlays
+        targetRevision: patch-me-see-clusters-overlays
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
