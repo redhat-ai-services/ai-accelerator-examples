@@ -1,0 +1,13 @@
+extends: default
+
+rules:
+  document-start: disable
+  indentation:
+    indent-sequences: whatever
+  line-length: disable
+  truthy:
+    ignore: .github/workflows/
+  comments-indentation: disable
+
+ignore:
+  - "*/charts/"
