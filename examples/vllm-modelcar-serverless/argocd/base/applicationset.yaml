@@ -12,7 +12,7 @@ spec:
       revision: main
       directories:
       - path: examples/vllm-modelcar-serverless/*/overlays/patch-me-see-overlay
-      - path: examples/vllm-modelcar-serverless/argocd/*
+      - path: examples/vllm-modelcar-serverless/argocd/overlays/*
         exclude: true
   template:
     metadata:
