@@ -16,12 +16,12 @@ spec:
         exclude: true
   template:
     metadata:
-      name: '{{path[2]}}-{{path[3]}}'
+      name: '{{path[1]}}-{{path[2]}}'
       annotations:
         argocd.argoproj.io/compare-options: IgnoreExtraneous
         argocd.argoproj.io/sync-options: Prune=false
       labels:
-        example: '{{path[2]}}'
+        example: '{{path[1]}}'
     spec:
       project: vllm-modelcar-serverless
       syncPolicy:
