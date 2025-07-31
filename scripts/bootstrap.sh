@@ -133,8 +133,8 @@ set_repo_branch(){
 main(){
     set_repo_url
     set_repo_branch
-    # choose_example
-    # choose_example_option ${CHOSEN_EXAMPLE_PATH}
+    choose_example
+    choose_example_option ${CHOSEN_EXAMPLE_PATH}
     # deploy_example ${CHOSEN_EXAMPLE_OPTION_PATH}
 }
 
