@@ -1,0 +1,17 @@
+apiVersion: v2
+name: argocd-appgenerator
+description: A Helm chart for generating ArgoCD ApplicationSets and Projects for AI accelerator examples
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+# Project URLs
+home: https://github.com/redhat-ai-services/ai-accelerator-examples
+sources:
+  - https://github.com/redhat-ai-services/ai-accelerator-examples
+
+# Maintainer information
+maintainers:
+  - name: Red Hat AI Services Team
+    email: ai-services@redhat.com
+    url: https://github.com/redhat-ai-services
