@@ -16,8 +16,8 @@ spec:
     #     path: components/odf/cluster
       - component: redhat-sso
         path: components/redhat-sso/operator/overlays/default
-      - component: redhat-sso
-        path: components/redhat-sso/instance/overlays/default
+      - component: redhat-sso-instance
+        path: components/redhat-sso/cluster
   template:
     metadata:
       name: '{{component}}'
