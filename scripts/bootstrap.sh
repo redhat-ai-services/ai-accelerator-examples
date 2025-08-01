@@ -85,10 +85,12 @@ deploy_example(){
     # Extract the example name from the path (second component after splitting by "/")
     example_name=$(echo "${chosen_example_overlay_path}" | cut -d'/' -f2)
 
+    echo
     echo "Example name: ${example_name}"
     echo "GITHUB_URL: ${GITHUB_URL}"
     echo "GIT_BRANCH: ${GIT_BRANCH}"
-    printf "chosen_example_overlay_path: %s\n" "${chosen_example_overlay_path}"
+    echo "chosen_example_overlay_path: ${chosen_example_overlay_path}"
+    echo
 
     helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
         --set fullnameOverride=${example_name} \
