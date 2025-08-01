@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: {{ include "argocd-appgenerator.name" . }}
+  name: {{ include "argocd-appgenerator.fullname" . }}
 spec:
   clusterResourceWhitelist:
     - group: '*'
