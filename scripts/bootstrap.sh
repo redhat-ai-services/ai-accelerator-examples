@@ -27,7 +27,7 @@ choose_example(){
 choose_example_option(){
     if [ -z "$1" ]; then
         echo "Error: No option provided to choose_example_option()"
-        echo "Usage: choose_example_option <chose_example_path>"
+        echo "Usage: choose_example_option <chosen_example_path>"
         exit 1
     fi
     chosen_example_path=$1
@@ -74,17 +74,17 @@ choose_example_option(){
 deploy_example(){
     if [ -z "$1" ]; then
         echo "Error: No option provided to deploy_example()"
-        echo "Usage: deploy_example <chose_example_overlay_path>"
+        echo "Usage: deploy_example <chosen_example_overlay_path>"
         exit 1
     fi
-    chose_example_overlay_path=$1
+    chosen_example_overlay_path=$1
 
     example_name="blah"
 
     helm install ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
         --set repoURL=${GITHUB_URL} \
         --set revision=${GIT_BRANCH} \
-        --set directories[0].path=${chose_example_overlay_path}
+        --set directories[0].path=${chosen_example_overlay_path}
 }
 
 
