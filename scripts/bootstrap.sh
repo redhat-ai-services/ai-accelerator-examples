@@ -79,19 +79,6 @@ deploy_example(){
     fi
     chose_example_overlay_path=$1
 
-    echo
-    echo "Deploying example: ${chose_example_overlay_path}"
-    kustomize build ${chose_example_overlay_path} | oc apply -n ${ARGOCD_NS} -f -
-}
-
-deploy_example_with_helm(){
-    if [ -z "$1" ]; then
-        echo "Error: No option provided to deploy_example()"
-        echo "Usage: deploy_example <chose_example_overlay_path>"
-        exit 1
-    fi
-    chose_example_overlay_path=$1
-
     example_name="blah"
 
     helm install ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
@@ -140,7 +127,7 @@ main(){
     set_repo_branch
     choose_example
     choose_example_option ${CHOSEN_EXAMPLE_PATH}
-    # deploy_example ${CHOSEN_EXAMPLE_OPTION_PATH}
+    deploy_example ${CHOSEN_EXAMPLE_OPTION_PATH}
 }
 
 # check_oc_login
