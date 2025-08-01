@@ -34,9 +34,14 @@ choose_example_option(){
 
     echo
 
-    # Check if argocd/overlays directory exists and count subdirectories
-    overlays_dir="${chosen_example_path}/argocd/overlays"
-    if [ -d "$overlays_dir" ]; then
+    # Find the first directory matching the pattern ${chosen_example_path}/*/overlays
+    overlays_parent_dir=$(find "${chosen_example_path}" -mindepth 2 -maxdepth 2 -type d -name "overlays" | head -n 1)
+    
+    if [ -n "$overlays_parent_dir" ]; then
+        overlays_dir="$overlays_parent_dir"
+        
+        echo "Found overlays directory: ${overlays_dir}"
+        
         overlay_count=$(find "$overlays_dir" -mindepth 1 -maxdepth 1 -type d | wc -l)
         if [ "$overlay_count" -gt 1 ]; then
             # multiple overlay options found
@@ -59,9 +64,9 @@ choose_example_option(){
             exit 2
         fi
 
-        CHOSEN_EXAMPLE_OPTION_PATH=${overlays_dir}/${chosen_option}
+        CHOSEN_EXAMPLE_OPTION_PATH="${chosen_example_path}/*/overlays/${chosen_option}"
     else
-        echo "Argocd folder was not found: ${overlays_dir}"
+        echo "No overlays folder was found matching pattern: ${chosen_example_path}/*/overlays"
         exit 2
     fi
 }
