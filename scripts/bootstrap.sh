@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# uncomment to debug
+# set -x
+
 EXAMPLES_DIR="examples"
 ARGOCD_NS="openshift-gitops"
 
@@ -77,14 +80,21 @@ deploy_example(){
         echo "Usage: deploy_example <chosen_example_overlay_path>"
         exit 1
     fi
-    chosen_example_overlay_path=$1
+    chosen_example_overlay_path="$1"
 
-    example_name="blah"
+    # Extract the example name from the path (second component after splitting by "/")
+    example_name=$(echo "${chosen_example_overlay_path}" | cut -d'/' -f2)
 
-    helm install ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
+    echo "Example name: ${example_name}"
+    echo "GITHUB_URL: ${GITHUB_URL}"
+    echo "GIT_BRANCH: ${GIT_BRANCH}"
+    printf "chosen_example_overlay_path: %s\n" "${chosen_example_overlay_path}"
+
+    helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
+        --set fullnameOverride=${example_name} \
         --set repoURL=${GITHUB_URL} \
         --set revision=${GIT_BRANCH} \
-        --set directories[0].path=${chosen_example_overlay_path}
+        --set directories[0].path="${chosen_example_overlay_path}"
 }
 
 
@@ -126,8 +136,8 @@ main(){
     set_repo_url
     set_repo_branch
     choose_example
-    choose_example_option ${CHOSEN_EXAMPLE_PATH}
-    deploy_example ${CHOSEN_EXAMPLE_OPTION_PATH}
+    choose_example_option "${CHOSEN_EXAMPLE_PATH}"
+    deploy_example "${CHOSEN_EXAMPLE_OPTION_PATH}"
 }
 
 # check_oc_login

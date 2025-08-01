@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: {{ include "argocd-appgenerator.name" . }}
+  name: {{ include "argocd-appgenerator.fullname" . }}
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: Prune=false
@@ -19,9 +19,9 @@ spec:
         argocd.argoproj.io/compare-options: IgnoreExtraneous
         argocd.argoproj.io/sync-options: Prune=false
       labels:
-        example: {{ include "argocd-appgenerator.name" . }}
+        example: {{ include "argocd-appgenerator.fullname" . }}
     spec:
-      project: {{ include "argocd-appgenerator.name" . }}
+      project: {{ include "argocd-appgenerator.fullname" . }}
       syncPolicy:
         automated:
           prune: false
