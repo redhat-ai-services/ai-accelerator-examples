@@ -10,4 +10,4 @@ rules:
   comments-indentation: disable
 
 ignore:
-  - "*/charts/"
+  - "**/charts/"

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: vllm-modelcar-serverless
+  name: {{ include "argocd-appgenerator.fullname" . }}
 spec:
   clusterResourceWhitelist:
     - group: '*'
@@ -10,4 +10,4 @@ spec:
     - namespace: '*'
       server: '*'
   sourceRepos:
-    - '*'
+    - {{ .Values.repoURL }}

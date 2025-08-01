@@ -1,0 +1,8 @@
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+repoURL: "https://github.com/redhat-ai-services/ai-accelerator-examples.git"
+revision: main
+
+directories: []

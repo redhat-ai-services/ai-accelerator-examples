@@ -6,6 +6,7 @@ venv/
 dictionary.dic
 tmp/
 **/charts/
+!/charts/
 .vscode/
 
 # Sealed secret key
