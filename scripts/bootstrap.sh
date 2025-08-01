@@ -20,7 +20,7 @@ choose_example(){
     done
 
     echo "You selected ${chosen_example}"
-
+ 
     CHOSEN_EXAMPLE_PATH=${examples_dir}/${chosen_example}
 }
 
@@ -82,8 +82,18 @@ deploy_example(){
 
 main(){
     choose_example
+
+    if [ "$chosen_example" == "models-as-a-service" ]; then
+        source "${CHOSEN_EXAMPLE_PATH}/models_as_a_services.sh"
+        prerequisite
+    fi
+
     choose_example_option ${CHOSEN_EXAMPLE_PATH}
     deploy_example ${CHOSEN_EXAMPLE_OPTION_PATH}
+
+    if [ "$chosen_example" == "models-as-a-service" ]; then
+        post-install-steps
+    fi
 }
 
 check_oc_login

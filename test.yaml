@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: models-as-a-service
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  description: Applications for the Models as a Service example
+  destinations:
+  - namespace: '*'
+    server: https://kubernetes.default.svc
+  sourceRepos:
+  - '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: models-as-a-service
+spec:
+  generators:
+  - list:
+      elements:
+      - component: 3scale-operator
+        path: components/3scale/operator/overlays/default
+      - component: 3scale-instance
+        path: components/3scale/cluster
+      - component: redhat-sso
+        path: components/redhat-sso/operator/overlays/default
+      - component: redhat-sso
+        path: components/redhat-sso/instance/overlays/default
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: models-as-a-service
+      name: '{{component}}'
+    spec:
+      destination:
+        server: https://kubernetes.default.svc
+      project: models-as-a-service
+      source:
+        path: '{{path}}'
+        repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+        targetRevision: main
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true

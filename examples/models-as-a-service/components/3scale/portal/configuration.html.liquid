@@ -1,0 +1,58 @@
+{% disable_client_cache %}
+
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 8px;
+    border: 1px solid #888;
+  }
+
+  th {
+    background-color: #f4f4f4;
+  }
+
+  /* Allow first column to shrink */
+  th:first-child, td:first-child {
+    text-align: left;
+    white-space: normal;  /* Allow wrapping in the first column */
+  }
+
+  /* Prevent wrapping in other columns */
+  th:not(:first-child), td:not(:first-child) {
+    text-align: right;
+    white-space: nowrap; /* Prevents wrapping */
+  }
+</style>
+
+<h1>Model Servers configuration</h1>
+
+<table>
+  <tr>
+    <th>Model name</th>
+    <th>Model size</th>
+    <th>Max tokens</th>
+    <th>GPU type</th>
+    <th>VRAM consumed</th>
+    <th>Function calling?</th>
+  </tr>
+  <tr>
+    <td>Granite-3.3-2B-Instruct</td>
+    <td>8B</td>
+    <td>22k</td>
+    <td>A10G</td>
+    <td>22 GB</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Granite-3.3-8B-Instruct</td>
+    <td>8B (Compressed)</td>
+    <td>40k</td>
+    <td>A10G</td>
+    <td>20 GB</td>
+    <td>Yes</td>
+  </tr>
+</table>

@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: models-as-a-service
+spec:
+  generators:
+  - list:
+      elements:
+      - component: 3scale-operator
+        path: components/3scale/operator/overlays/default
+      - component: 3scale-instance
+        path: components/3scale/cluster
+    #   - component: odf-operator
+    #     path: components/odf/operator/overlays/default
+    #   - component: odf-instance
+    #     path: components/odf/cluster
+      - component: redhat-sso
+        path: components/redhat-sso/operator/overlays/default
+      - component: redhat-sso
+        path: components/redhat-sso/instance/overlays/default
+  template:
+    metadata:
+      name: '{{component}}'
+      labels:
+        app.kubernetes.io/part-of: models-as-a-service
+    spec:
+      project: models-as-a-service
+      source:
+        repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+        targetRevision: maas
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true 
