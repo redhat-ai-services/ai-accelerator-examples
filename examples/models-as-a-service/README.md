@@ -8,7 +8,6 @@ This example automates the deployment and configuration of the following compone
 
 *   **3scale API Management**: For API gateway functionality, including access control, rate limiting, and analytics.
 *   **Red Hat SSO (Keycloak)**: For centralized authentication and authorization, integrated with the 3scale developer portal.
-*   **OpenShift Data Foundation (ODF)**: As a recommended provider for the required ReadWriteMany (RWX) storage, used by 3scale.
 
 ## Prerequisites
 
@@ -16,6 +15,7 @@ Before you begin, ensure you have the following:
 
 *   An OpenShift cluster with cluster-admin privileges.
 *   The OpenShift GitOps operator installed.
+*   RWX Storage requirement. (ODF or NFS storage supports RWX storage)
 *   The following command-line tools installed locally:
     *   `oc`
     *   `git`
@@ -48,7 +48,7 @@ After the initial deployment is complete, the script performs several post-insta
 *   Waits for all components (3scale, Red Hat SSO) to become ready.
 *   Retrieves and displays the admin credentials for 3scale and Red Hat SSO.
 *   Configures a Keycloak client for 3scale integration.
-*   Creates a sample `developer` user in Keycloak for testing purposes.
+*   Creates a sample `developer` user in Keycloak for testing purposes. Note the user's password for future use as  it wont be retained anywhere.
 *   Configures the 3scale developer portal with Single Sign-On (SSO) via Keycloak.
 *   Updates the 3scale developer portal with custom content.
 
@@ -59,4 +59,10 @@ After the post-installation steps, you will be prompted to register a new model 
 *   **Model Name**: A unique name for your model.
 *   **Model URL**: The internal service URL where your model is deployed.
 
-The script then automatically creates the necessary backend, product, and application plan in 3scale to expose your model through the API gateway. You can register multiple models. 
+The script then automatically creates the necessary backend, product, and application plan in 3scale to expose your model through the API gateway. You can register multiple models.
+
+## Known Issues
+
+### Developer Portal Content Update
+
+When the post-installation script updates the 3scale developer portal content, you may see several messages indicating that it "Could not delete built-in SECTION". These messages are expected and can be safely ignored. The script is attempting to perform a clean synchronization, but 3scale prevents the deletion of certain default content. The custom portal content will still be uploaded correctly. 
