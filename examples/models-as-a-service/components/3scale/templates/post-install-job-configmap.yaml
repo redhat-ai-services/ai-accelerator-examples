@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apimanager-watcher-script
+  namespace: {{ .Values.namespace | default "3scale" }}
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-weight": "4"
+data:
+  wait-for-apimanager.sh: |
+    #!/bin/bash
+    set -e
+    
+    APIMANAGER_NAME="apimanager"
+    NAMESPACE="{{ .Values.namespace | default "3scale" }}"
+    
+    echo "Waiting for APIManager ${APIMANAGER_NAME} in namespace ${NAMESPACE} to be ready..."
+    
+    while true; do
+      READY=$(oc get apimanager ${APIMANAGER_NAME} -n ${NAMESPACE} -o jsonpath='{.status.conditions[?(@.type=="Available")].status}')
+      if [[ "${READY}" == "True" ]]; then
+        echo "APIManager is ready."
+        break
+      fi
+      echo "APIManager not ready yet, sleeping for 10 seconds..."
+      sleep 10
+    done
+    
+    # Add your post-install commands here
+    echo "Running post-install commands..." 

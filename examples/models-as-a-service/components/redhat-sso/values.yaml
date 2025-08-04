@@ -1,0 +1,8 @@
+# Default values for redhat-sso
+namespace: redhat-sso
+channel: stable
+keycloak:
+  name: redhat-sso
+  realm:
+    name: maas
+    displayName: "MaaS on RHOAI" 

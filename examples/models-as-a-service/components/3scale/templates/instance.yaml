@@ -1,0 +1,28 @@
+apiVersion: apps.3scale.net/v1alpha1
+kind: APIManager
+metadata:
+  name: apimanager
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  wildcardDomain: {{ .Values.wildcardDomain }}
+  resourceRequirementsEnabled: false
+  tenantName: maas
+  system:
+    fileStorage:
+      persistentVolumeClaim:
+        storageClassName: {{ .Values.storageClassName }}
+  apicast:
+    stagingSpec:
+      customPolicies:
+        - name: llm-metrics
+          version: "0.1"
+          secretRef:
+             name: llm-metrics
+    productionSpec:
+      customPolicies:
+        - name: llm-metrics
+          version: "0.1"
+          secretRef:
+             name: llm-metrics 

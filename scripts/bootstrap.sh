@@ -84,7 +84,7 @@ main(){
     choose_example
 
     if [ "$chosen_example" == "models-as-a-service" ]; then
-        source "${CHOSEN_EXAMPLE_PATH}/models_as_a_services.sh"
+        source "${CHOSEN_EXAMPLE_PATH}/models_as_a_service.sh"
         prerequisite
     fi
 

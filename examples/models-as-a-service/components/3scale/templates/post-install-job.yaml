@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: apimanager-watcher-job
+  namespace: {{ .Values.namespace | default "3scale" }}
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-weight": "5"
+spec:
+  template:
+    spec:
+      serviceAccountName: apimanager-watcher-sa
+      restartPolicy: OnFailure
+      containers:
+      - name: apimanager-watcher
+        image: registry.redhat.io/openshift4/ose-cli:latest
+        command: ["/bin/bash", "-c", "/scripts/wait-for-apimanager.sh"]
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+      volumes:
+      - name: scripts
+        configMap:
+          name: apimanager-watcher-script
+          defaultMode: 0777 
