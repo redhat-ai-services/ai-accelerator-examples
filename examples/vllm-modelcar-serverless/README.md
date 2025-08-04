@@ -24,7 +24,6 @@ This example also requires that a GPU such as an A10G be available in the cluste
 
 This example contains the following components:
 
-* `argocd`: Used to configure the components using ArgoCD
 * `namespaces`: Used to configure the namespaces required for the example
 * `vllm`: Used to deploy the vLLM instance with the Granite model
 * `tests`: An example notebook that can be used to connect to the vLLM instance
