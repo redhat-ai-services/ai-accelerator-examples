@@ -227,7 +227,7 @@ update_developer_portal() {
 
     echo "Updating developer portal content... This may take a moment."
     podman run --userns=keep-id:uid=185 -it --rm -v "$(pwd)/${PORTAL_DIR}":/cms:Z ghcr.io/fwmotion/3scale-cms:latest \
-        -k --access-token="${ACCESS_TOKEN}" ${ACCESS_TOKEN} "https://${ADMIN_HOST}" upload --delete-missing --layout=/l_main_layout.html.liquid
+        -k --access-token="${ACCESS_TOKEN}" ${ACCESS_TOKEN} "https://${ADMIN_HOST}" upload -u --delete-missing --layout=/l_main_layout.html.liquid
 
     echo "Developer portal update command executed."
     echo "Note: There is also a 'download' option if you want to make changes manually on the 3scale CMS portal first."
