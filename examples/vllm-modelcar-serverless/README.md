@@ -48,6 +48,6 @@ To remove the deployment:
 
 ```bash
 # Remove ArgoCD application
-oc delete -k examples/vllm-modelcar-serverless/argocd/overlays/default -n openshift-gitops
+helm uninstall vllm-modelcar-serverless -n openshift-gitops
 ```
 
