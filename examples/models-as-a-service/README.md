@@ -25,7 +25,7 @@ Before you begin, ensure you have the following:
 
 ## Deployment
 
-To deploy this example, clone this repository and run the bootstrap script from the root directory:
+To deploy this example, fork the repository to your personal repository and run the bootstrap script from the root directory:
 
 ```bash
 ./bootstrap.sh
