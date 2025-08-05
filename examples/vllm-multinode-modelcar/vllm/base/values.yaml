@@ -1,0 +1,11 @@
+fullnameOverride: granite
+
+deploymentMode: RawDeployment
+servingTopology: multiNode
+
+multiNode:
+  pipelineParallelSize: 2
+  tensorParallelSize: 1
+
+model:
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:qwen2.5-7b-instruct
