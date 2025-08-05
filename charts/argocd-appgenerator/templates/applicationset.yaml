@@ -34,7 +34,7 @@ spec:
             maxDuration: 20m
       source:
         repoURL: {{ .Values.repoURL }}
-        revision: {{ .Values.revision }}
+        targetRevision: {{ .Values.revision }}
         path: '{{`{{path}}`}}'
       destination:
         server: https://kubernetes.default.svc
