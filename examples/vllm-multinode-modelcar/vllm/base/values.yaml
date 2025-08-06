@@ -9,3 +9,5 @@ multiNode:
 
 model:
   uri: oci://quay.io/redhat-ai-services/modelcar-catalog:qwen2.5-7b-instruct
+  args:
+    - --served-model-name="Qwen/Qwen2.5-7B-Instruct"
