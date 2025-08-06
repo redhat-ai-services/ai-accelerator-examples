@@ -4,13 +4,17 @@ ArgoCD
 Backoff
 DataSciencePipelines
 GitOps
+ImageStream
 KServe
 Kubernetes
+MinIO
 ModelCar
 OpenShift
+RBAC
 README
 Serverless
 ServiceMesh
+Tekton
 github
 https
 kfp
