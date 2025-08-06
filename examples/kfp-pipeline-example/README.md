@@ -1,22 +1,28 @@
 # KFP Pipeline Example
 
-Todo
+This example deploys a Tekton pipeline that builds an image based on an example [Iris pipeline](https://github.com/redhat-ai-services/kubeflow-pipelines-examples/blob/main/pipelines/11_iris_training_pipeline.py), and then triggers an execution of the KFP pipeline.
+
+![KFP Pipeline](./images/kfp-run.png)
 
 ## Dependencies
 
 This example requires a cluster with the following components:
 * OpenShift AI
   * DataSciencePipelines
-* OpenShift Pipelines
+* OpenShift Pipelines (Tekton)
 
 ## Overview
 
 This example contains the following components:
 
-* `argocd`: Used to configure the components using ArgoCD
 * `namespaces`: Used to configure the namespaces required for the example
 * `dspa`: Used to deploy the Data Science Pipeline Application instance
-* todo
+* `minio`: Used to deploy MinIO object storage for pipeline artifacts and data
+* `tekton-pipeline`: Used to deploy Tekton pipeline resources including:
+  - Pipeline definitions for data science workflows
+  - Pipeline runs and execution tasks
+  - RBAC configurations for pipeline execution
+  - ImageStream configurations for container images
 
 ## Quick Start
 
