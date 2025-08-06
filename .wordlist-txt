@@ -9,9 +9,12 @@ KServe
 Kubernetes
 MinIO
 ModelCar
+Multinode
 OpenShift
 RBAC
+Qwen
 README
+RawDeployment
 Serverless
 ServiceMesh
 Tekton
