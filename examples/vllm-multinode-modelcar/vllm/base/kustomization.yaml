@@ -6,6 +6,6 @@ namespace: vllm-multinode-modelcar
 helmCharts:
 - name: vllm-kserve
   releaseName: multinode-qwen
-  version: 0.5.1
+  version: 0.5.2
   repo: https://redhat-ai-services.github.io/helm-charts/
   valuesFile: values.yaml
