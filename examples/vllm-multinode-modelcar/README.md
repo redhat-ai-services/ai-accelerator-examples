@@ -18,9 +18,7 @@ This example requires a cluster with the following components:
 * NVIDIA GPU Operator
 * Node Feature Discovery
 
-This example requires multiple GPU nodes to support the multinode topology. The configuration uses:
-* Pipeline Parallel Size: 2
-* Tensor Parallel Size: 1
+This example requires multiple GPU nodes to support the multinode topology.
 
 ## Overview
 
@@ -33,9 +31,10 @@ This example contains the following components:
 ## Configuration
 
 ### Model Configuration
-- **Model**: Qwen2.5 7B Instruct from Red Hat AI Services ModelCar Catalog
-- **Deployment Mode**: RawDeployment (non-serverless)
-- **Serving Topology**: Multinode with pipeline parallelism
+- **Model**: [Qwen2.5 7B Instruct](https://huggingface.co/Qwen/Qwen2.5-7B)
+- **ModelCar Image**: https://github.com/redhat-ai-services/modelcar-catalog/tree/main/modelcar-images/qwen2.5-7b-instruct
+- **Deployment Mode**: RawDeployment
+- **Serving Topology**: Multinode
 - **Pipeline Parallel Size**: 2
 - **Tensor Parallel Size**: 1
 
