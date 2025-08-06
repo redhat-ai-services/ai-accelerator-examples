@@ -21,7 +21,7 @@ spec:
     disableHealthCheck: false
     externalStorage:
       bucket: pipelines
-      host: "minio.ai-example-training.svc.cluster.local:9000"
+      host: "minio.kfp-pipeline-example.svc.cluster.local:9000"
       port: ""
       s3CredentialsSecret:
         accessKey: minio_root_user
