@@ -2,6 +2,7 @@ ApplicationSet
 ApplicationSets
 ArgoCD
 Backoff
+DataSciencePipelines
 GitOps
 KServe
 Kubernetes
@@ -12,6 +13,7 @@ Serverless
 ServiceMesh
 github
 https
+kfp
 kserve
 namespace
 namespaces
