@@ -1,0 +1,12 @@
+fullnameOverride: multinode-qwen
+
+deploymentMode: RawDeployment
+servingTopology: multiNode
+
+multiNode:
+  pipelineParallelSize: 2
+  tensorParallelSize: 1
+
+model:
+  modelNameOverride: Qwen/Qwen2.5-7B-Instruct"
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:qwen2.5-7b-instruct
