@@ -2,4 +2,4 @@ apiVersion: v2
 name: redhat-sso
 description: A Helm chart for deploying Red Hat SSO
 version: 0.1.0
-appVersion: "7.6" 
+appVersion: "7.6"

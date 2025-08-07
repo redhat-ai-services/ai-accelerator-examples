@@ -2,9 +2,9 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: 3scale-operator-group
-  namespace: {{ .Values.namespace }}
+  namespace: '{{ .Values.namespace }}'
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
   targetNamespaces:
-  - {{ .Values.namespace }} 
+  - '{{ .Values.namespace }}'

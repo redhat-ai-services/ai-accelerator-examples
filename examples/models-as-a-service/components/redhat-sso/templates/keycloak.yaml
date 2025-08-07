@@ -1,12 +1,12 @@
 apiVersion: keycloak.org/v1alpha1
 kind: Keycloak
 metadata:
-  name: {{ .Values.keycloak.name | default "redhat-sso" }}
-  namespace: {{ .Values.namespace | default "redhat-sso" }}
+  name: '{{ .Values.keycloak.name | default "redhat-sso" }}'
+  namespace: '{{ .Values.namespace | default "redhat-sso" }}'
   annotations:
     argocd.argoproj.io/sync-wave: "2"
   labels:
-    app: {{ .Values.keycloak.name | default "redhat-sso" }}
+    app: '{{ .Values.keycloak.name | default "redhat-sso" }}'
 spec:
   externalAccess:
     enabled: true
