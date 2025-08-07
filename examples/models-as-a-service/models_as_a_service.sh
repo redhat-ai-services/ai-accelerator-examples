@@ -193,12 +193,6 @@ post-install-steps() {
     fi
     echo "Found 3scale admin host: ${ADMIN_HOST}"
 
-    read -p "Update 3scale developer portal with the latest content? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        update_developer_portal
-    fi
-
     configure_sso_developer_portal
 
 
@@ -209,29 +203,6 @@ post-install-steps() {
 
     # Clean up the temp file if it exists
     rm -f -- "${RESPONSE_FILE-}"
-}
-
-update_developer_portal() {
-    echo "--- Updating 3scale Developer Portal ---"
-
-    PORTAL_DIR="examples/models-as-a-service/components/3scale/portal"
-    if [ ! -d "$PORTAL_DIR" ]; then
-        echo "Portal content directory not found at ${PORTAL_DIR}"
-        echo "Please ensure the portal files are located there. You may need to copy them from the original models-aas-demo/3scale/portal directory."
-        read -p "Press enter to continue or Ctrl+C to abort."
-        return
-    fi
-    echo "Clean up developer portal content... This may take a moment."
-    podman run --userns=keep-id:uid=185 -it --rm -v "$(pwd)/${PORTAL_DIR}":/cms:Z ghcr.io/fwmotion/3scale-cms:latest \
-        -k --access-token="${ACCESS_TOKEN}" ${ACCESS_TOKEN} "https://${ADMIN_HOST}" delete --yes-i-really-want-to-delete-the-entire-developer-portal
-
-    echo "Updating developer portal content... This may take a moment."
-    podman run --userns=keep-id:uid=185 -it --rm -v "$(pwd)/${PORTAL_DIR}":/cms:Z ghcr.io/fwmotion/3scale-cms:latest \
-        -k --access-token="${ACCESS_TOKEN}" ${ACCESS_TOKEN} "https://${ADMIN_HOST}" upload -u --delete-missing --layout=/l_main_layout.html.liquid
-
-    echo "Developer portal update command executed."
-    echo "Note: There is also a 'download' option if you want to make changes manually on the 3scale CMS portal first."
-    echo "--- Finished updating 3scale Developer Portal ---"
 }
 
 configure_keycloak_client() {

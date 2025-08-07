@@ -1,2 +1,3 @@
 yamllint
 pyspelling
+pymdown-extensions
