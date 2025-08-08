@@ -10,3 +10,13 @@ multiNode:
 model:
   modelNameOverride: Qwen/Qwen2.5-7B-Instruct"
   uri: oci://quay.io/redhat-ai-services/modelcar-catalog:qwen2.5-7b-instruct
+
+resources:
+  limits:
+    cpu: '8'
+    memory: 12Gi
+    nvidia.com/gpu: '1'
+  requests:
+    cpu: '4'
+    memory: 8Gi
+    nvidia.com/gpu: '1'
