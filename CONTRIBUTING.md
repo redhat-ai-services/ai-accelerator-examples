@@ -84,7 +84,7 @@ Each component overlays folder will be deployed using ArgoCD from the bootstrap 
 
 ### Use Kustomize Best Practices
 
-- **Organize with `base/` and `overlays/`**: Separate base configurations from environment-specific customizations
+- **Organize with `base/` and `overlays/`**: Separate base configurations from environment-specific customizations or configurations for specific RHOAI/OCP versions
 - **Follow naming conventions**: Use consistent resource naming
 - **Include proper labels**: Add standard Kubernetes labels
 
