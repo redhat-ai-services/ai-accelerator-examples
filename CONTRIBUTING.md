@@ -16,7 +16,7 @@ We welcome contributions! This guide will help you contribute effectively to the
 Before contributing, ensure you have:
 - Access to an OpenShift cluster with OpenShift AI installed
 - Required tools: `oc`, `git`, `helm`
-- Familiarity with Kubernetes, Kustomize, Hel, and GitOps concepts
+- Familiarity with Kubernetes, Kustomize, Helm, and GitOps concepts
 
 ### Development Setup
 
