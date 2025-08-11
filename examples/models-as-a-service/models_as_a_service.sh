@@ -37,18 +37,6 @@ prerequisite() {
 
     VALUES_YAML_3SCALE_PATH="examples/models-as-a-service/components/3scale/values.yaml"
 
-    # Update wildcard domain
-    echo "Discovering cluster wildcard domain..."
-    WILDCARD_DOMAIN_APPS=$(oc get ingresscontroller -n openshift-ingress-operator default -o jsonpath='{.status.domain}')
-    if [ -z "$WILDCARD_DOMAIN_APPS" ]; then
-        echo "Could not automatically determine wildcard domain. Please update ${VALUES_YAML_3SCALE_PATH} manually."
-    else
-        echo "Found wildcard domain: ${WILDCARD_DOMAIN_APPS}"
-        echo "Updating 3scale instance with wildcard domain..."
-        yq e -i '.wildcardDomain = "'"${WILDCARD_DOMAIN_APPS}"'"' "$VALUES_YAML_3SCALE_PATH"
-        echo "File ${VALUES_YAML_3SCALE_PATH} updated."
-    fi
-
     echo "Updating 3scale instance with storage class: ${rwx_storage_class}"
     yq e -i '.storageClassName = "'"${rwx_storage_class}"'"' "$VALUES_YAML_3SCALE_PATH"
     echo "File ${VALUES_YAML_3SCALE_PATH} updated."
