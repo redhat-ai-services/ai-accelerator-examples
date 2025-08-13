@@ -5,6 +5,6 @@ namespace: 3scale
 # channel: The 3scale operator channel to subscribe to
 channel: threescale-2.15
 # wildcardDomain: The wildcard domain for the 3scale API manager
-wildcardDomain: apps.cluster-k7jk7.k7jk7.sandbox2654.opentlc.com
+wildcardDomain: apps.cluster-rr4pg.rr4pg.sandbox134.opentlc.com
 # storageClassName: The storage class for the 3scale system file storage
 storageClassName: ocs-storagecluster-cephfs

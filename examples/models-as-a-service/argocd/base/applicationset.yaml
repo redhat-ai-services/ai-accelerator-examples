@@ -5,8 +5,8 @@ metadata:
 spec:
   generators:
     - git:
-        repoURL: https://github.com/sukantadash/ai-accelerator-examples-maas.git
-        revision: main
+        repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+        revision: maas
         directories:
           - path: examples/models-as-a-service/components/*
   template:
@@ -17,8 +17,8 @@ spec:
     spec:
       project: models-as-a-service
       source:
-        repoURL: https://github.com/sukantadash/ai-accelerator-examples-maas.git
-        targetRevision: main
+        repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+        targetRevision: maas
         path: '{{path}}'
         helm:
           releaseName: '{{path.basename}}-release'
@@ -29,5 +29,3 @@ spec:
         automated:
           prune: true
           selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
