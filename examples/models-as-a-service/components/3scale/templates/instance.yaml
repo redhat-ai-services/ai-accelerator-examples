@@ -4,9 +4,9 @@ metadata:
   name: apimanager
   namespace: {{ .Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
-  wildcardDomain: {{ .Values.wildcardDomain }}
+  wildcardDomain: 'apps.cluster-rr4pg.rr4pg.sandbox134.opentlc.com'
   resourceRequirementsEnabled: false
   tenantName: maas
   system:

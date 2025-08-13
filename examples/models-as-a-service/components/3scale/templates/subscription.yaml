@@ -4,7 +4,7 @@ metadata:
   name: 3scale-operator
   namespace: {{ .Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   channel: {{ .Values.channel }}
   name: 3scale-operator

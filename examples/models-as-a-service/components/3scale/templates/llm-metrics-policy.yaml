@@ -3,6 +3,8 @@ apiVersion: capabilities.3scale.net/v1beta1
 metadata:
   name: llm-metrics
   namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   name: llm-metrics
   schema:

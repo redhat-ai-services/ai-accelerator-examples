@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace | default "redhat-sso" }}
   annotations:
     argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     app: {{ .Values.keycloak.name | default "redhat-sso" }}
 spec:

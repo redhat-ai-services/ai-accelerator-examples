@@ -2,9 +2,9 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: rhsso-operator-group
-  namespace: {{ .Values.namespace | default "rh-sso" }}
+  namespace: {{ .Values.namespace | default "redhat-sso" }}
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
   targetNamespaces:
-  - {{ .Values.namespace | default "rh-sso" }} 
+  - {{ .Values.namespace | default "redhat-sso" }} 
