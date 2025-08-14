@@ -12,12 +12,13 @@ spec:
       restartPolicy: OnFailure
       initContainers:
       - name: clone-and-copy
-        image: registry.redhat.io/openshift4/ose-tools-rhel9@latest
-        command: ["/bin/sh", "-c"]
+        image: registry.redhat.io/openshift4/ose-tools-rhel9:latest
+        command: ["/bin/sh"]
         args:
+        - "-c"
         - |
-          git clone https://github.com/rh-aiservices-bu/models-aas.git /tmp/models-aas &&
-          cp -r /tmp/models-aas/deployment/3scale/portal/. /cms
+          /usr/bin/git clone https://github.com/rh-aiservices-bu/models-aas.git /tmp/models-aas &&
+          cp -rv /tmp/models-aas/deployment/3scale/portal/. /cms
         volumeMounts:
         - name: cms-volume
           mountPath: /cms
@@ -25,10 +26,17 @@ spec:
       - name: cms-upload
         image: ghcr.io/fwmotion/3scale-cms:latest
         command: ["/bin/sh", "-c"]
+        env:
+        - name: THREESCALE_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: system-seed
+              key: ADMIN_ACCESS_TOKEN
+        - name: THREESCALE_ADMIN_HOST
+          value: "maas-admin.{{ .Values.wildcardDomain }}"
         args:
         - |
-          export ACCESS_TOKEN=$(oc get secret system-seed -o json -n {{ .Values.namespace | default "3scale" }} | jq -r '.data.ADMIN_ACCESS_TOKEN' | base64 -d)
-          export ADMIN_HOST=$(oc get route -n {{ .Values.namespace | default "3scale" }} | grep maas-admin | awk '{print $2}')
+          alias cms="java -Djava.util.logging.manager=org.jboss.logmanager.LogManager -jar /home/jboss/quarkus-run.jar"
 
           #echo "Clean up developer portal content... This may take a moment."
           #cms -k --access-token="${ACCESS_TOKEN}" "${ACCESS_TOKEN}" "https://${ADMIN_HOST}" delete --yes-i-really-want-to-delete-the-entire-developer-portal

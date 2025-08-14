@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  wildcardDomain: '{{ (lookup "operator.openshift.io/v1" "IngressController" "openshift-ingress-operator" "default").status.domain }}'
+  wildcardDomain: '{{ .Values.wildcardDomain }}'
   resourceRequirementsEnabled: false
   tenantName: maas
   system:
