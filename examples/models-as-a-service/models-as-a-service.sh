@@ -17,7 +17,7 @@ check_commands() {
 prerequisite() {
     echo "--- Running prerequisite steps for Models as a Service ---"
 
-    check_commands jq yq oc git podman
+    check_commands jq yq oc git
 
     # 3scale RWX Storage check
     echo "The 3scale operator requires a storage class with ReadWriteMany (RWX) access mode."
@@ -29,68 +29,55 @@ prerequisite() {
         exit 1
     fi
 
-    read -p "Please enter the name of the RWX storage class: " rwx_storage_class
+    local default_storage_class="ocs-storagecluster-cephfs"
+
+    read -p "Please enter the name of the RWX storage class [${default_storage_class}]: " rwx_storage_class
+
+    # If nothing entered, use default
+    local rwx_storage_class="${rwx_storage_class:-$default_storage_class}"
+
     while [ -z "$rwx_storage_class" ]; do
         echo "Storage class name cannot be empty."
-        read -p "Please enter the name of the RWX storage class: " rwx_storage_class
+        read -p "Please enter the name of the RWX storage class [${default_storage_class}]: " rwx_storage_class
+        rwx_storage_class="${rwx_storage_class:-$default_storage_class}"
     done
 
-    VALUES_YAML_3SCALE_PATH="examples/models-as-a-service/components/3scale/values.yaml"
-
-    echo "Updating 3scale instance with storage class: ${rwx_storage_class}"
-    yq e -i '.storageClassName = "'"${rwx_storage_class}"'"' "$VALUES_YAML_3SCALE_PATH"
-    echo "File ${VALUES_YAML_3SCALE_PATH} updated."
-
-    # Update ApplicationSet with current Git repo and branch
-    echo "--- Updating ApplicationSet configuration ---"
-    APPLICATIONSET_YAML_PATH="examples/models-as-a-service/argocd/base/applicationset.yaml"
-    
-    CURRENT_REPO_URL=$(git config --get remote.origin.url)
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-    if [ -z "$CURRENT_REPO_URL" ] || [ -z "$CURRENT_BRANCH" ]; then
-        echo "Error: Could not determine current Git repository URL or branch."
-        echo "Please ensure you are in a valid Git repository."
-        return 1
-    fi
-
-    echo "Updating ApplicationSet to use your repository:"
-    echo "  Repo URL: ${CURRENT_REPO_URL}"
-    echo "  Branch: ${CURRENT_BRANCH}"
-
-    yq e -i '.spec.generators[0].git.repoURL = "'"${CURRENT_REPO_URL}"'"' "${APPLICATIONSET_YAML_PATH}"
-    yq e -i '.spec.generators[0].git.revision = "'"${CURRENT_BRANCH}"'"' "${APPLICATIONSET_YAML_PATH}"
-    yq e -i '.spec.template.spec.source.repoURL = "'"${CURRENT_REPO_URL}"'"' "${APPLICATIONSET_YAML_PATH}"
-    yq e -i '.spec.template.spec.source.targetRevision = "'"${CURRENT_BRANCH}"'"' "${APPLICATIONSET_YAML_PATH}"
-
-    echo "ApplicationSet updated successfully."
-
-    # Commit and push changes
-    echo "--- Pushing configuration changes to Git ---"
-    read -p "Do you want to commit and push the configuration changes to your repository? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        git config --global credential.helper 'cache --timeout=3600'
-
-        git add "${VALUES_YAML_3SCALE_PATH}" "${APPLICATIONSET_YAML_PATH}"
-        
-        # Check if there are changes to commit
-        if git diff --staged --quiet; then
-            echo "No configuration changes to commit."
-        else
-            git commit -m "Update MaaS configuration for deployment"
-            echo "Pushing changes to branch '${CURRENT_BRANCH}'..."
-            if git push origin "HEAD:${CURRENT_BRANCH}"; then
-                echo "Configuration pushed to repository successfully."
-            else
-                echo "Error: Failed to push configuration to repository."
-                echo "Please check your credentials and ensure you have push permissions."
-                return 1
-            fi
-        fi
+    # Update wildcard domain
+    echo "Discovering cluster wildcard domain..."
+    local WILDCARD_DOMAIN_APPS=$(oc get ingresscontroller -n openshift-ingress-operator default -o jsonpath='{.status.domain}')
+    if [ -z "$WILDCARD_DOMAIN_APPS" ]; then
+        echo "Could not automatically determine wildcard domain."
+        exit 1
     else
-        echo "Skipping Git push. Please commit and push the changes manually for the deployment to work correctly."
+        echo "Found wildcard domain: ${WILDCARD_DOMAIN_APPS}"
     fi
+
+
+    # TODO: this secret is required by 3scale; here, for testing purposes, I'm copying one from the cluster
+
+    # Create namespace if it doesn't exist
+    if ! oc get namespace admachad-3scake &>/dev/null; then
+        echo "Creating namespace admachad-3scake..."
+        oc create namespace admachad-3scake && \
+            oc label namespace admachad-3scake argocd.argoproj.io/managed-by=openshift-gitops
+    fi
+
+    # Create secret only if it doesn't exist
+    if ! oc get secret threescale-registry-auth -n admachad-3scake &>/dev/null; then
+        echo "Creating threescale-registry-auth secret..."
+        oc extract secret/pull-secret -n openshift-config --keys=.dockerconfigjson --to=- \
+            | grep -v .dockerconfigjson \
+            | oc create secret generic threescale-registry-auth -n admachad-3scake --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=/dev/stdin
+    else
+        echo "Secret threescale-registry-auth already exists in admachad-3scake namespace."
+    fi
+
+
+    # Save substitutions for later usage (git repo/branch handled globally)
+    subs+=(
+        "WILDCARD_DOMAIN=${WILDCARD_DOMAIN_APPS}"
+        "STORAGE_CLASS=${rwx_storage_class}"
+    )
 
     echo "--- Prerequisite steps completed. ---"
 }
@@ -104,56 +91,56 @@ post-install-steps() {
     # In production, you should ensure proper certificates are configured.
     CURL_OPTS=("-s" "-k")
 
-    # Wait for 3scale namespace to be created
+    # Wait for 3scake namespace to be created
     echo "Waiting for the 3scale namespace to be created..."
-    until oc get namespace 3scale &> /dev/null; do
-        echo "Namespace '3scale' not found. Waiting..."
+    until oc get namespace 3scake &> /dev/null; do
+        echo "Namespace '3scake' not found. Waiting..."
         sleep 10
     done
-    echo "Namespace '3scale' found."
-    
+    echo "Namespace '3scake' found."
+
     # Wait for 3scale APIManager to be created
     echo "Waiting for 3scale APIManager to be created..."
-    until oc get apimanager/apimanager -n 3scale &> /dev/null; do
-        echo "APIManager 'apimanager' in namespace '3scale' not found. Waiting..."
+    until oc get apimanager/apimanager -n 3scake &> /dev/null; do
+        echo "APIManager 'apimanager' in namespace '3scake' not found. Waiting..."
         sleep 30
     done
-    echo "APIManager 'apimanager' in namespace '3scale' found."
+    echo "APIManager 'apimanager' in namespace '3scake' found."
 
-    # Wait for 3scale to be ready
-    echo "Waiting for 3scale APIManager to be ready..."
-    oc wait --for=condition=Available --timeout=15m apimanager/apimanager -n 3scale
+    # Wait for 3scake to be ready
+    echo "Waiting for 3scake APIManager to be ready..."
+    oc wait --for=condition=Available --timeout=15m apimanager/apimanager -n 3scake
 
-    # Get 3scale admin password
-    THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n 3scale -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
-    THREESCALE_ADMIN_URL=$(oc get route -l zync.3scale.net/route-to=system-provider -n 3scale -o jsonpath='{.items[0].spec.host}')
+    # Get 3scake admin password
+    THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n 3scake -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
+    THREESCALE_ADMIN_URL=$(oc get route -l zync.3scale.net/route-to=system-provider -n 3scake -o jsonpath='{.items[0].spec.host}')
     echo "3scale Admin URL: https://${THREESCALE_ADMIN_URL}"
     echo "3scale Admin Password: ${THREESCALE_ADMIN_PASS}"
 
 
-    # Wait for redhat-sso namespace to be created
-    echo "Waiting for the redhat-sso namespace to be created..."
-    until oc get namespace redhat-sso &> /dev/null; do
-        echo "Namespace 'redhat-sso' not found. Waiting..."
+    # Wait for maas-redhat-sso namespace to be created
+    echo "Waiting for the maas-redhat-sso namespace to be created..."
+    until oc get namespace maas-redhat-sso &> /dev/null; do
+        echo "Namespace 'maas-redhat-sso' not found. Waiting..."
         sleep 10
     done
-    echo "Namespace 'redhat-sso' found."
+    echo "Namespace 'maas-redhat-sso' found."
 
     # Wait for REDHAT-SSO Keycloak to be created
     echo "Waiting for statefulset Keycloak to be created..."
-    until oc get statefulset/keycloak -n redhat-sso &> /dev/null; do
-        echo "statefulset 'keycloak' in namespace 'redhat-sso' not found. Waiting..."
+    until oc get statefulset/keycloak -n maas-redhat-sso &> /dev/null; do
+        echo "statefulset 'keycloak' in namespace 'maas-redhat-sso' not found. Waiting..."
         sleep 30
     done
-    echo "statefulset 'keycloak' in namespace 'redhat-sso' found."
+    echo "statefulset 'keycloak' in namespace 'maas-redhat-sso' found."
 
     # Get REDHAT-SSO credentials
     echo "Waiting for statefulset 'keycloak' to be ready..."
-    oc wait --for=jsonpath='{.status.readyReplicas}'=1 statefulset/keycloak -n redhat-sso --timeout=15m
-    
-    REDHATSSO_ADMIN_USER=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_USERNAME}' | base64 -d)
-    REDHATSSO_ADMIN_PASS=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
-    REDHATSSO_URL=$(oc get route keycloak -n redhat-sso -o jsonpath='{.spec.host}')
+    oc wait --for=jsonpath='{.status.readyReplicas}'=1 statefulset/keycloak -n maas-redhat-sso --timeout=15m
+
+    REDHATSSO_ADMIN_USER=$(oc get secret credential-maas-redhat-sso -n maas-redhat-sso -o jsonpath='{.data.ADMIN_USERNAME}' | base64 -d)
+    REDHATSSO_ADMIN_PASS=$(oc get secret credential-maas-redhat-sso -n maas-redhat-sso -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
+    REDHATSSO_URL=$(oc get route keycloak -n maas-redhat-sso -o jsonpath='{.spec.host}')
     echo "REDHAT-SSO Admin URL: https://${REDHATSSO_URL}/auth/admin/maas/console/"
     echo "REDHAT-SSO Admin User: ${REDHATSSO_ADMIN_USER}"
     echo "REDHAT-SSO Admin Password: ${REDHATSSO_ADMIN_PASS}"
@@ -167,14 +154,14 @@ post-install-steps() {
         return 1
     fi
 
-    echo "Retrieving 3scale admin access token and host..."
-    ACCESS_TOKEN=$(oc get secret system-seed -n 3scale -o jsonpath='{.data.ADMIN_ACCESS_TOKEN}' | base64 -d)
+    echo "Retrieving 3scake admin access token and host..."
+    ACCESS_TOKEN=$(oc get secret system-seed -n 3scake -o jsonpath='{.data.ADMIN_ACCESS_TOKEN}' | base64 -d)
     if [ -z "$ACCESS_TOKEN" ]; then
         echo "Failed to retrieve 3scale access token. Please ensure the 'system-seed' secret exists in the '3scale' namespace and is populated."
         return 1
     fi
 
-    ADMIN_HOST=$(oc get route -n 3scale | grep 'maas-admin' | awk '{print $2}')
+    ADMIN_HOST=$(oc get route -n 3scake | grep 'maas-admin' | awk '{print $2}')
     if [ -z "$ADMIN_HOST" ]; then
         echo "Failed to retrieve 3scale admin host. Please ensure the route exists in the '3scale' namespace."
         return 1
@@ -186,7 +173,7 @@ post-install-steps() {
 
 
     echo "--- Post-install steps completed! ---"
-    
+
     handle_model_registration_loop
 
     # Clean up the temp file if it exists
@@ -212,17 +199,17 @@ configure_keycloak_client() {
 
     REALM="maas"
 
-    echo "Checking if client '3scale' exists in realm '${REALM}'..."
-    CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scale" \
+    echo "Checking if client '3scake' exists in realm '${REALM}'..."
+    CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scake" \
         -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
 
     if [ -n "$CLIENT_ID_3SCALE" ] && [ "$CLIENT_ID_3SCALE" != "null" ]; then
-        echo "Client '3scale' already exists with ID: ${CLIENT_ID_3SCALE}. Skipping creation."
+        echo "Client '3scake' already exists with ID: ${CLIENT_ID_3SCALE}. Skipping creation."
     else
-        echo "Client '3scale' does not exist. Creating it..."
+        echo "Client '3scake' does not exist. Creating it..."
         CREATE_CLIENT_PAYLOAD=$(cat <<EOF
 {
-    "clientId": "3scale",
+    "clientId": "3scake",
     "protocol": "openid-connect",
     "publicClient": false,
     "standardFlowEnabled": true,
@@ -235,20 +222,20 @@ configure_keycloak_client() {
 }
 EOF
 )
-        
+
         curl "${CURL_OPTS[@]}" -X POST "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients" \
             -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "${CREATE_CLIENT_PAYLOAD}"
 
-        CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scale" \
+        CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scake" \
             -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
-        
+
         if [ -z "$CLIENT_ID_3SCALE" ] || [ "$CLIENT_ID_3SCALE" == "null" ]; then
-            echo "Failed to create client '3scale' or retrieve its ID. Exiting."
+            echo "Failed to create client '3scake' or retrieve its ID. Exiting."
             return 1
         fi
-        echo "Client '3scale' created with ID: ${CLIENT_ID_3SCALE}."
+        echo "Client '3scake' created with ID: ${CLIENT_ID_3SCALE}."
     fi
 
     echo "Adding protocol mappers..."
@@ -342,7 +329,7 @@ EOF
 
         USER_ID=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users?username=developer&exact=true" \
             -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
-        
+
         if [ -z "$USER_ID" ] || [ "$USER_ID" == "null" ]; then
             echo "Failed to create user 'developer' or retrieve its ID."
             return 1
@@ -362,7 +349,7 @@ EOF
             -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "${SET_PASSWORD_PAYLOAD}"
-        
+
         echo "Password for 'developer' user has been set."
         echo "Username: developer"
         echo "Password: ${DEVELOPER_PASSWORD}"
@@ -409,7 +396,7 @@ configure_sso_developer_portal() {
             -d "client_secret=${CLIENT_SECRET}" \
             -d "site=https://${REDHATSSO_URL}/auth/realms/maas" \
             -d "published=true")
-        
+
         if [[ "$HTTP_CODE" -ge 400 ]]; then
             echo "Error: Failed to create RH-SSO integration. Received HTTP status ${HTTP_CODE}."
             echo "Response from server:"
@@ -421,7 +408,7 @@ configure_sso_developer_portal() {
 
     local AUTH_PROVIDER_ID
     AUTH_PROVIDER_ID=$(curl "${CURL_OPTS[@]}" -X GET "https://${ADMIN_HOST}/admin/api/authentication_providers.xml?access_token=${ACCESS_TOKEN}" | yq -p xml -o json | jq -r '[.authentication_providers.authentication_provider?] | flatten | .[] | select(.kind? == "keycloak") | .id')
-    
+
     if [ -z "$AUTH_PROVIDER_ID" ]; then
         echo "Failed to retrieve Authentication Provider ID. Cannot update 'Always approve accounts'."
         return 1
@@ -457,7 +444,7 @@ handle_model_registration_loop() {
             echo "Model registration failed. Aborting."
             break
         fi
-        
+
         read -p "Do you want to register another model? (y/n) " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -498,7 +485,7 @@ register_model_3scale_core() {
             -d "access_token=${ACCESS_TOKEN}" \
             -d "name=${model_name}" \
             -d "private_endpoint=${model_url}")
-        
+
         HTTP_CODE=$(echo "${BACKEND_RESPONSE}" | tail -n1)
         BACKEND_BODY=$(echo "${BACKEND_RESPONSE}" | sed '$d')
         BACKEND_ID=$(echo "${BACKEND_BODY}" | jq -r '.backend_api.id')
@@ -522,7 +509,7 @@ register_model_3scale_core() {
         PRODUCT_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X POST "https://${ADMIN_HOST}/admin/api/services.json" \
             -d "access_token=${ACCESS_TOKEN}" \
             -d "name=${model_name}")
-            
+
         HTTP_CODE=$(echo "${PRODUCT_RESPONSE}" | tail -n1)
         PRODUCT_BODY=$(echo "${PRODUCT_RESPONSE}" | sed '$d')
         PRODUCT_ID=$(echo "${PRODUCT_BODY}" | jq -r '.service.id')
@@ -549,7 +536,7 @@ register_model_3scale_core() {
         -d "access_token=${ACCESS_TOKEN}" \
         -d "backend_api_id=${BACKEND_ID}" \
         -d "path=/")
-    
+
     HTTP_CODE=$(echo "${LINK_RESPONSE}" | tail -n1)
     LINK_BODY=$(echo "${LINK_RESPONSE}" | sed '$d')
 
@@ -585,7 +572,7 @@ register_model_3scale_core() {
         -d "access_token=${ACCESS_TOKEN}" \
         -d "friendly_name=${FRIENDLY_NAME}" \
         -d "system_name=${METHOD_SYSTEM_NAME}")
-    
+
     HTTP_CODE=$(echo "${METHOD_RESPONSE}" | tail -n1)
     METHOD_BODY=$(echo "${METHOD_RESPONSE}" | sed '$d')
     METHOD_ID=$(echo "${METHOD_BODY}" | jq -r '.method.id')
@@ -604,7 +591,7 @@ register_model_3scale_core() {
         echo "Error: Failed to get method ID for '${FRIENDLY_NAME}'."
         return 1
     fi
-    
+
     PATTERN="/v1/chat/completions"
     echo "Creating mapping rule for pattern '${PATTERN}'..."
     MAPPING_RULE_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X POST "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/proxy/mapping_rules.json" \
@@ -613,7 +600,7 @@ register_model_3scale_core() {
         -d "pattern=${PATTERN}" \
         -d "metric_id=${METHOD_ID}" \
         -d "delta=1")
-        
+
     HTTP_CODE=$(echo "${MAPPING_RULE_RESPONSE}" | tail -n1)
     MAPPING_RULE_BODY=$(echo "${MAPPING_RULE_RESPONSE}" | sed '$d')
 
@@ -715,18 +702,18 @@ activate_service_for_all_accounts() {
     while [ "$page" -le "$total_pages" ]; do
         local accounts_response
         accounts_response=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/accounts.json?access_token=${ACCESS_TOKEN}&page=${page}")
-        
+
         if [ "$page" -eq 1 ]; then
             total_pages=$(echo "${accounts_response}" | jq -r '.metadata.total_pages')
             if [ -z "$total_pages" ] || [ "$total_pages" == "null" ]; then
                 total_pages=1
             fi
         fi
-        
+
         local ids
         ids=$(echo "${accounts_response}" | jq -r '.accounts[].account.id')
         account_ids+=($ids)
-        
+
         ((page++))
     done
 
@@ -737,7 +724,7 @@ activate_service_for_all_accounts() {
     local fail_count=0
     for account_id in "${account_ids[@]}"; do
         echo "Processing account ID: ${account_id}"
-        
+
         # Check if the account is already subscribed
         local subscribed_plans
         subscribed_plans=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/accounts/${account_id}/applications.json?access_token=${ACCESS_TOKEN}" | jq -r '.applications[].application.plan_id')
@@ -754,7 +741,7 @@ activate_service_for_all_accounts() {
             -d "access_token=${ACCESS_TOKEN}" \
             -d "plan_id=${plan_id}" \
             -d "name=dummy-activation-app-$(date +%s)")
-        
+
         local http_code
         http_code=$(echo "${app_response}" | tail -n1)
         local app_body
@@ -774,7 +761,7 @@ activate_service_for_all_accounts() {
         # Delete dummy application
         local delete_response
         delete_response=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X DELETE "https://${ADMIN_HOST}/admin/api/accounts/${account_id}/applications/${app_id}.json?access_token=${ACCESS_TOKEN}")
-        
+
         http_code=$(echo "${delete_response}" | tail -n1)
 
         if [ "$http_code" -ne 200 ]; then
@@ -782,7 +769,7 @@ activate_service_for_all_accounts() {
         else
             echo "  Successfully activated service and deleted dummy application."
         fi
-        
+
         ((success_count++))
     done
 
@@ -790,4 +777,4 @@ activate_service_for_all_accounts() {
     echo "Successful activations: ${success_count}"
     echo "Failed activations: ${fail_count}"
     echo "--------------------------------"
-} 
+}

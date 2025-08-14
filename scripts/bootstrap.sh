@@ -6,7 +6,7 @@ ARGOCD_NS="openshift-gitops"
 
 source "$(dirname "$0")/functions.sh"
 
-choose_example(){
+choose_example() {
     examples_dir=${EXAMPLES_DIR}
 
     echo
@@ -24,7 +24,7 @@ choose_example(){
     CHOSEN_EXAMPLE_PATH=${examples_dir}/${chosen_example}
 }
 
-choose_example_option(){
+choose_example_option() {
     if [ -z "$1" ]; then
         echo "Error: No option provided to choose_example_option()"
         echo "Usage: choose_example_option <chose_example_path>"
@@ -66,7 +66,7 @@ choose_example_option(){
     fi
 }
 
-deploy_example(){
+deploy_example() {
     if [ -z "$1" ]; then
         echo "Error: No option provided to deploy_example()"
         echo "Usage: deploy_example <chose_example_overlay_path>"
@@ -76,24 +76,39 @@ deploy_example(){
 
     echo
     echo "Deploying example: ${chose_example_overlay_path}"
-    kustomize build ${chose_example_overlay_path} | oc apply -n ${ARGOCD_NS} -f -
+
+    sed_args=()
+    for sub in "${subs[@]}"; do
+        key="${sub%%=*}"
+        val="${sub#*=}"
+        sed_args+=("-e" "s|${key}|${val}|g")
+    done
+
+    kustomize build ${chose_example_overlay_path} \
+        | sed "${sed_args[@]}" \
+        | tee \
+        | oc apply -n ${ARGOCD_NS} -f -
 }
 
 
 main(){
     choose_example
 
-    if [ "$chosen_example" == "models-as-a-service" ]; then
-        source "${CHOSEN_EXAMPLE_PATH}/models_as_a_service.sh"
-        prerequisite
+    # Initialize subs array
+    subs=()
+
+    if [ -f "${CHOSEN_EXAMPLE_PATH}/$chosen_example.sh" ]; then
+        source "${CHOSEN_EXAMPLE_PATH}/$chosen_example.sh"
     fi
+
+    # Has prerequisite steps?
+    [[ $(type -t prerequisite) == function ]] && prerequisite
 
     choose_example_option ${CHOSEN_EXAMPLE_PATH}
     deploy_example ${CHOSEN_EXAMPLE_OPTION_PATH}
 
-    if [ "$chosen_example" == "models-as-a-service" ]; then
-        post-install-steps
-    fi
+    # Has post-install steps?
+    [[ $(type -t post-install-steps) == function ]] && post-install-steps
 }
 
 check_oc_login
