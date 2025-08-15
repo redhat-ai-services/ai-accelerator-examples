@@ -1,17 +1,17 @@
 apiVersion: keycloak.org/v1alpha1
 kind: KeycloakRealm
 metadata:
-  name: {{ .Values.keycloak.realm.name | default "maas" }}
-  namespace: {{ .Values.namespace | default "redhat-sso" }}
+  name: '{{ .Values.keycloak.realm.name | default "maas" }}'
+  namespace: '{{ .Values.namespace | default "redhat-sso" }}'
   annotations:
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   instanceSelector:
     matchLabels:
-      app: {{ .Values.keycloak.name | default "redhat-sso" }}
+      app: '{{ .Values.keycloak.name | default "redhat-sso" }}'
   realm:
-    id: {{ .Values.keycloak.realm.name | default "maas" }}
-    realm: {{ .Values.keycloak.realm.name | default "maas" }}
-    displayName: {{ .Values.keycloak.realm.displayName | default "MaaS on RHOAI" }}
+    id: '{{ .Values.keycloak.realm.name | default "maas" }}'
+    realm: '{{ .Values.keycloak.realm.name | default "maas" }}'
+    displayName: '{{ .Values.keycloak.realm.displayName | default "MaaS on RHOAI" }}'
     enabled: true

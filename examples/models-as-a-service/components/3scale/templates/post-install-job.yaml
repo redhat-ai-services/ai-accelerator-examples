@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: apimanager-watcher-job
-  namespace: {{ .Values.namespace | default "3scale" }}
+  namespace: '{{ .Values.namespace | default "3scale" }}'
   annotations:
     "helm.sh/hook": "post-install,post-upgrade"
     "helm.sh/hook-weight": "5"
@@ -22,4 +22,4 @@ spec:
       - name: scripts
         configMap:
           name: apimanager-watcher-script
-          defaultMode: 0777 
+          defaultMode: 0777

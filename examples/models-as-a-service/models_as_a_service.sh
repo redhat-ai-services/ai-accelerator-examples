@@ -26,7 +26,7 @@ check_commands() {
 prerequisite() {
     echo "--- Running prerequisite steps for Models as a Service ---"
 
-    check_commands jq yq oc git podman
+    check_commands jq yq oc git
 
     # 3scale RWX Storage check
     echo "The 3scale operator requires a storage class with ReadWriteMany (RWX) access mode."
@@ -201,12 +201,6 @@ post-install-steps() {
     fi
     echo "Found 3scale admin host: ${ADMIN_HOST}"
 
-    read -p "Update 3scale developer portal with the latest content? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        update_developer_portal
-    fi
-
     configure_sso_developer_portal
 
     echo "--- Post-install steps completed! ---"
@@ -218,29 +212,6 @@ post-install-steps() {
 
     # Clean up the temp file if it exists
     rm -f -- "${RESPONSE_FILE-}"
-}
-
-update_developer_portal() {
-    echo "--- Updating 3scale Developer Portal ---"
-
-    PORTAL_DIR="examples/models-as-a-service/components/3scale/portal"
-    if [ ! -d "$PORTAL_DIR" ]; then
-        echo "Portal content directory not found at ${PORTAL_DIR}"
-        echo "Please ensure the portal files are located there. You may need to copy them from the original models-aas-demo/3scale/portal directory."
-        read -p "Press enter to continue or Ctrl+C to abort."
-        return
-    fi
-    echo "Clean up developer portal content... This may take a moment."
-    podman run --userns=keep-id:uid=185 -it --rm -v "$(pwd)/${PORTAL_DIR}":/cms:Z ghcr.io/fwmotion/3scale-cms:latest \
-        -k --access-token="${ACCESS_TOKEN}" ${ACCESS_TOKEN} "https://${ADMIN_HOST}" delete --yes-i-really-want-to-delete-the-entire-developer-portal
-
-    echo "Updating developer portal content... This may take a moment."
-    podman run --userns=keep-id:uid=185 -it --rm -v "$(pwd)/${PORTAL_DIR}":/cms:Z ghcr.io/fwmotion/3scale-cms:latest \
-        -k --access-token="${ACCESS_TOKEN}" ${ACCESS_TOKEN} "https://${ADMIN_HOST}" upload -u --delete-missing --layout=/l_main_layout.html.liquid
-
-    echo "Developer portal update command executed."
-    echo "Note: There is also a 'download' option if you want to make changes manually on the 3scale CMS portal first."
-    echo "--- Finished updating 3scale Developer Portal ---"
 }
 
 configure_keycloak_client() {
@@ -261,7 +232,7 @@ configure_keycloak_client() {
     echo "Successfully got Keycloak admin token."
 
     REALM="maas"
-    
+
     echo "Checking if client '3scale' exists in realm '${REALM}'..."
     CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scale" \
         -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
@@ -580,7 +551,7 @@ configure_sso_developer_portal() {
             -d "client_secret=${CLIENT_SECRET}" \
             -d "site=https://${REDHATSSO_URL}/auth/realms/maas" \
             -d "published=true")
-        
+
         if [[ "$HTTP_CODE" -ge 400 ]]; then
             echo "Error: Failed to create RH-SSO integration. Received HTTP status ${HTTP_CODE}."
             echo "Response from server:"
@@ -592,7 +563,7 @@ configure_sso_developer_portal() {
 
     local AUTH_PROVIDER_ID
     AUTH_PROVIDER_ID=$(curl "${CURL_OPTS[@]}" -X GET "https://${ADMIN_HOST}/admin/api/authentication_providers.xml?access_token=${ACCESS_TOKEN}" | yq -p xml -o json | jq -r '[.authentication_providers.authentication_provider?] | flatten | .[] | select(.kind? == "keycloak") | .id')
-    
+
     if [ -z "$AUTH_PROVIDER_ID" ]; then
         echo "Failed to retrieve Authentication Provider ID. Cannot update 'Always approve accounts'."
         return 1
