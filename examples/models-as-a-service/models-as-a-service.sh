@@ -56,20 +56,20 @@ prerequisite() {
     # TODO: this secret is required by 3scale; here, for testing purposes, I'm copying one from the cluster
 
     # Create namespace if it doesn't exist
-    if ! oc get namespace admachad-3scake &>/dev/null; then
-        echo "Creating namespace admachad-3scake..."
-        oc create namespace admachad-3scake && \
-            oc label namespace admachad-3scake argocd.argoproj.io/managed-by=openshift-gitops
+    if ! oc get namespace 3scale &>/dev/null; then
+        echo "Creating namespace 3scale..."
+        oc create namespace 3scale && \
+            oc label namespace 3scale argocd.argoproj.io/managed-by=openshift-gitops
     fi
 
     # Create secret only if it doesn't exist
-    if ! oc get secret threescale-registry-auth -n admachad-3scake &>/dev/null; then
+    if ! oc get secret threescale-registry-auth -n 3scale &>/dev/null; then
         echo "Creating threescale-registry-auth secret..."
         oc extract secret/pull-secret -n openshift-config --keys=.dockerconfigjson --to=- \
             | grep -v .dockerconfigjson \
-            | oc create secret generic threescale-registry-auth -n admachad-3scake --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=/dev/stdin
+            | oc create secret generic threescale-registry-auth -n 3scale --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=/dev/stdin
     else
-        echo "Secret threescale-registry-auth already exists in admachad-3scake namespace."
+        echo "Secret threescale-registry-auth already exists in 3scale namespace."
     fi
 
 
@@ -91,29 +91,29 @@ post-install-steps() {
     # In production, you should ensure proper certificates are configured.
     CURL_OPTS=("-s" "-k")
 
-    # Wait for 3scake namespace to be created
+    # Wait for 3scale namespace to be created
     echo "Waiting for the 3scale namespace to be created..."
-    until oc get namespace 3scake &> /dev/null; do
-        echo "Namespace '3scake' not found. Waiting..."
+    until oc get namespace 3scale &> /dev/null; do
+        echo "Namespace '3scale' not found. Waiting..."
         sleep 10
     done
-    echo "Namespace '3scake' found."
+    echo "Namespace '3scale' found."
 
     # Wait for 3scale APIManager to be created
     echo "Waiting for 3scale APIManager to be created..."
-    until oc get apimanager/apimanager -n 3scake &> /dev/null; do
-        echo "APIManager 'apimanager' in namespace '3scake' not found. Waiting..."
+    until oc get apimanager/apimanager -n 3scale &> /dev/null; do
+        echo "APIManager 'apimanager' in namespace '3scale' not found. Waiting..."
         sleep 30
     done
-    echo "APIManager 'apimanager' in namespace '3scake' found."
+    echo "APIManager 'apimanager' in namespace '3scale' found."
 
-    # Wait for 3scake to be ready
-    echo "Waiting for 3scake APIManager to be ready..."
-    oc wait --for=condition=Available --timeout=15m apimanager/apimanager -n 3scake
+    # Wait for 3scale to be ready
+    echo "Waiting for 3scale APIManager to be ready..."
+    oc wait --for=condition=Available --timeout=15m apimanager/apimanager -n 3scale
 
-    # Get 3scake admin password
-    THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n 3scake -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
-    THREESCALE_ADMIN_URL=$(oc get route -l zync.3scale.net/route-to=system-provider -n 3scake -o jsonpath='{.items[0].spec.host}')
+    # Get 3scale admin password
+    THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n 3scale -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
+    THREESCALE_ADMIN_URL=$(oc get route -l zync.3scale.net/route-to=system-provider -n 3scale -o jsonpath='{.items[0].spec.host}')
     echo "3scale Admin URL: https://${THREESCALE_ADMIN_URL}"
     echo "3scale Admin Password: ${THREESCALE_ADMIN_PASS}"
 
@@ -154,14 +154,14 @@ post-install-steps() {
         return 1
     fi
 
-    echo "Retrieving 3scake admin access token and host..."
-    ACCESS_TOKEN=$(oc get secret system-seed -n 3scake -o jsonpath='{.data.ADMIN_ACCESS_TOKEN}' | base64 -d)
+    echo "Retrieving 3scale admin access token and host..."
+    ACCESS_TOKEN=$(oc get secret system-seed -n 3scale -o jsonpath='{.data.ADMIN_ACCESS_TOKEN}' | base64 -d)
     if [ -z "$ACCESS_TOKEN" ]; then
         echo "Failed to retrieve 3scale access token. Please ensure the 'system-seed' secret exists in the '3scale' namespace and is populated."
         return 1
     fi
 
-    ADMIN_HOST=$(oc get route -n 3scake | grep 'maas-admin' | awk '{print $2}')
+    ADMIN_HOST=$(oc get route -n 3scale | grep 'maas-admin' | awk '{print $2}')
     if [ -z "$ADMIN_HOST" ]; then
         echo "Failed to retrieve 3scale admin host. Please ensure the route exists in the '3scale' namespace."
         return 1
@@ -199,17 +199,17 @@ configure_keycloak_client() {
 
     REALM="maas"
 
-    echo "Checking if client '3scake' exists in realm '${REALM}'..."
-    CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scake" \
+    echo "Checking if client '3scale' exists in realm '${REALM}'..."
+    CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scale" \
         -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
 
     if [ -n "$CLIENT_ID_3SCALE" ] && [ "$CLIENT_ID_3SCALE" != "null" ]; then
-        echo "Client '3scake' already exists with ID: ${CLIENT_ID_3SCALE}. Skipping creation."
+        echo "Client '3scale' already exists with ID: ${CLIENT_ID_3SCALE}. Skipping creation."
     else
-        echo "Client '3scake' does not exist. Creating it..."
+        echo "Client '3scale' does not exist. Creating it..."
         CREATE_CLIENT_PAYLOAD=$(cat <<EOF
 {
-    "clientId": "3scake",
+    "clientId": "3scale",
     "protocol": "openid-connect",
     "publicClient": false,
     "standardFlowEnabled": true,
@@ -228,14 +228,14 @@ EOF
             -H "Content-Type: application/json" \
             -d "${CREATE_CLIENT_PAYLOAD}"
 
-        CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scake" \
+        CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scale" \
             -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
 
         if [ -z "$CLIENT_ID_3SCALE" ] || [ "$CLIENT_ID_3SCALE" == "null" ]; then
-            echo "Failed to create client '3scake' or retrieve its ID. Exiting."
+            echo "Failed to create client '3scale' or retrieve its ID. Exiting."
             return 1
         fi
-        echo "Client '3scake' created with ID: ${CLIENT_ID_3SCALE}."
+        echo "Client '3scale' created with ID: ${CLIENT_ID_3SCALE}."
     fi
 
     echo "Adding protocol mappers..."
