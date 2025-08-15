@@ -5,4 +5,4 @@ keycloak:
   name: redhat-sso
   realm:
     name: maas
-    displayName: "MaaS on RHOAI" 
+    displayName: "MaaS on RHOAI"

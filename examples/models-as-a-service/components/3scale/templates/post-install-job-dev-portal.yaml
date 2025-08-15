@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: 3scale-dev-portal-deploy
+  namespace: '{{ .Values.namespace | default "3scale" }}'
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-weight": "6"
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: clone-and-copy
+          image: registry.redhat.io/openshift4/ose-tools-rhel9:latest
+          command: ["/bin/sh"]
+          args:
+            - "-c"
+            - |
+              /usr/bin/git clone https://github.com/rh-aiservices-bu/models-aas.git /tmp/models-aas &&
+              cp -rv /tmp/models-aas/deployment/3scale/portal/. /cms
+          volumeMounts:
+            - name: cms-volume
+              mountPath: /cms
+      containers:
+        - name: cms-upload
+          image: ghcr.io/fwmotion/3scale-cms:latest
+          command: ["/bin/sh", "-c"]
+          env:
+            - name: ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: system-seed
+                  key: ADMIN_ACCESS_TOKEN
+            - name: ADMIN_HOST
+              value: "maas-admin.{{ .Values.wildcardDomain }}"
+          args:
+            - |
+              alias cms="java -Djava.util.logging.manager=org.jboss.logmanager.LogManager -jar /home/jboss/quarkus-run.jar"
+
+              echo "Clean up developer portal content... This may take a moment."
+              cms -k --access-token="${ACCESS_TOKEN}" "${ACCESS_TOKEN}" "https://${ADMIN_HOST}" delete --yes-i-really-want-to-delete-the-entire-developer-portal
+
+              echo "Updating developer portal content... This may take a moment."
+              cms -k --directory=/cms --access-token="${ACCESS_TOKEN}" "${ACCESS_TOKEN}" "https://${ADMIN_HOST}" upload -u --delete-missing --layout=/l_main_layout.html.liquid
+          volumeMounts:
+            - name: cms-volume
+              mountPath: /cms
+      volumes:
+        - name: cms-volume
+          emptyDir: {}
