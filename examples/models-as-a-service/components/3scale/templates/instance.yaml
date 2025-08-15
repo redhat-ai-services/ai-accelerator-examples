@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
-  wildcardDomain: 'apps.cluster-rr4pg.rr4pg.sandbox134.opentlc.com'
+  wildcardDomain: {{ .Values.wildcardDomain }}
   resourceRequirementsEnabled: false
   tenantName: maas
   system:

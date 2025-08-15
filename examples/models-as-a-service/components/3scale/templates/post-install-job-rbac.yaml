@@ -18,7 +18,13 @@ metadata:
 rules:
 - apiGroups: ["apps.3scale.net"]
   resources: ["apimanagers"]
-  verbs: ["get", "list", "watch"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes"]
+  verbs: ["get", "list"]
+- apiGroups: ["operator.openshift.io"]
+  resources: ["ingresscontrollers"]
+  verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -35,3 +41,34 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: apimanager-watcher-sa 
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: apimanager-watcher-clusterrole
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-weight": "2"
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list"]
+- apiGroups: ["operator.openshift.io"]
+  resources: ["ingresscontrollers"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: apimanager-watcher-crb
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-weight": "3"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: apimanager-watcher-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: apimanager-watcher-sa
+  namespace: {{ .Values.namespace | default "3scale" }} 

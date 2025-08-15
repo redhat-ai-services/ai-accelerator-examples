@@ -14,17 +14,57 @@ data:
     APIMANAGER_NAME="apimanager"
     NAMESPACE="{{ .Values.namespace | default "3scale" }}"
     
-    echo "Waiting for APIManager ${APIMANAGER_NAME} in namespace ${NAMESPACE} to be ready..."
-    
-    while true; do
-      READY=$(oc get apimanager ${APIMANAGER_NAME} -n ${NAMESPACE} -o jsonpath='{.status.conditions[?(@.type=="Available")].status}')
-      if [[ "${READY}" == "True" ]]; then
-        echo "APIManager is ready."
-        break
-      fi
-      echo "APIManager not ready yet, sleeping for 10 seconds..."
+    echo "Waiting for namespace ${NAMESPACE} to exist..."
+    until oc get namespace ${NAMESPACE} >/dev/null 2>&1; do
+      echo "Namespace ${NAMESPACE} not found. Sleeping for 10 seconds..."
       sleep 10
     done
+    echo "Namespace ${NAMESPACE} exists."
+    
+    echo "Waiting for APIManager ${APIMANAGER_NAME} in namespace ${NAMESPACE} to be created..."
+    until oc get apimanager ${APIMANAGER_NAME} -n ${NAMESPACE} >/dev/null 2>&1; do
+      echo "APIManager ${APIMANAGER_NAME} not found yet, sleeping for 10 seconds..."
+      sleep 10
+    done
+    echo "APIManager ${APIMANAGER_NAME} detected."
     
     # Add your post-install commands here
-    echo "Running post-install commands..." 
+    echo "Running post-install commands..."
+
+    # Determine whether to patch wildcardDomain
+    CURRENT_WILDCARD=$(oc get apimanager ${APIMANAGER_NAME} -n ${NAMESPACE} -o jsonpath='{.spec.wildcardDomain}' 2>/dev/null || true)
+    SHOULD_PATCH="true"
+    if [[ "${CURRENT_WILDCARD}" == "Needtopatchit" ]]; then
+      echo "wildcardDomain is placeholder 'Needtopatchit'. Will patch with detected value."
+    elif [[ -n "${CURRENT_WILDCARD}" ]]; then
+      echo "wildcardDomain is already set to '${CURRENT_WILDCARD}'. Skipping patch."
+      SHOULD_PATCH="false"
+    fi
+
+    if [[ "${SHOULD_PATCH}" == "true" ]]; then
+      # Use configured wildcardDomain when provided (and not the placeholder); otherwise, auto-detect
+      DEFAULT_WILDCARD="{{ .Values.wildcardDomain | default "" }}"
+      if [[ -n "${DEFAULT_WILDCARD}" && "${DEFAULT_WILDCARD}" != "Needtopatchit" ]]; then
+        WILDCARD_DOMAIN="${DEFAULT_WILDCARD}"
+        echo "Using provided wildcard domain: ${WILDCARD_DOMAIN}"
+      else
+        echo "Attempting to auto-detect wildcard domain from IngressController..."
+        WILDCARD_DOMAIN_APPS=$(oc get ingresscontroller -n openshift-ingress-operator default -o jsonpath='{.status.domain}' 2>/dev/null || true)
+        if [[ -z "${WILDCARD_DOMAIN_APPS}" ]]; then
+          echo "Could not discover wildcard domain from IngressController. Skipping wildcardDomain patch."
+        else
+          WILDCARD_DOMAIN="${WILDCARD_DOMAIN_APPS}"
+          echo "Detected wildcard domain: ${WILDCARD_DOMAIN}"
+        fi
+      fi
+
+      if [[ -n "${WILDCARD_DOMAIN}" ]]; then
+        echo "Patching APIManager ${APIMANAGER_NAME} with wildcardDomain=${WILDCARD_DOMAIN}..."
+        oc -n ${NAMESPACE} patch apimanager ${APIMANAGER_NAME} --type=merge -p "{\"spec\":{\"wildcardDomain\":\"${WILDCARD_DOMAIN}\"}}"
+        echo "Patch applied."
+      fi
+    fi
+
+    echo "Waiting for APIManager ${APIMANAGER_NAME} to become Available..."
+    oc -n ${NAMESPACE} wait --for=condition=Available --timeout=15m apimanager/${APIMANAGER_NAME}
+    echo "APIManager is Available." 

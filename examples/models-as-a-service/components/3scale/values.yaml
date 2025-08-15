@@ -7,3 +7,6 @@ channel: threescale-2.15
 
 # storageClassName: The storage class for the 3scale system file storage
 storageClassName: ocs-storagecluster-cephfs
+
+# wildcardDomain: The cluster apps wildcard domain. If not set, a post-install job will try to detect it automatically from Routes.
+wildcardDomain: "Needtopatchit"
