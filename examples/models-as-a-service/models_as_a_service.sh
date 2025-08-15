@@ -180,9 +180,6 @@ post-install-steps() {
     echo "REDHAT-SSO Admin URL: ${COLOR_PINK}https://${REDHATSSO_URL}${COLOR_RESET}"
     echo "REDHAT-SSO Admin User: ${COLOR_PINK}${REDHATSSO_ADMIN_USER}${COLOR_RESET}"
     echo "REDHAT-SSO Admin Password: ${COLOR_PINK}${REDHATSSO_ADMIN_PASS}${COLOR_RESET}"
-    echo
-    echo "Press enter to continue REDHAT-SSO configuration steps..."
-    read
 
     configure_keycloak_client
     if [ $? -ne 0 ]; then
@@ -857,13 +854,47 @@ register_model_3scale_core() {
         return 1
     fi
 
+    # 5b. Service Plan Configuration (set default for automatic signup)
+    SERVICE_PLAN_NAME="Default"
+    echo "Creating service plan '${SERVICE_PLAN_NAME}'..."
+    SERVICE_PLAN_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X POST "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/service_plans.json" \
+        -d "access_token=${ACCESS_TOKEN}" \
+        -d "name=${SERVICE_PLAN_NAME}" \
+        -d "state_event=publish")
+
+    HTTP_CODE=$(echo "${SERVICE_PLAN_RESPONSE}" | tail -n1)
+    SERVICE_PLAN_BODY=$(echo "${SERVICE_PLAN_RESPONSE}" | sed '$d')
+    if [ "$HTTP_CODE" -eq 201 ]; then
+        echo "Service plan '${SERVICE_PLAN_NAME}' created successfully."
+        SERVICE_PLAN_ID=$(echo "${SERVICE_PLAN_BODY}" | jq -r '.service_plan.id')
+    elif [ "$HTTP_CODE" -eq 422 ] && echo "${SERVICE_PLAN_BODY}" | jq -e 'tostring | contains("already")' > /dev/null; then
+        echo "Service plan '${SERVICE_PLAN_NAME}' already exists. Resolving its ID..."
+        SERVICE_PLAN_ID=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/service_plans.json?access_token=${ACCESS_TOKEN}" | jq -r '.plans[] | .service_plan | select(.name == "'"${SERVICE_PLAN_NAME}"'") | .id')
+    else
+        echo "Failed to create service plan. HTTP Status: ${HTTP_CODE}. Response:"
+        echo "${SERVICE_PLAN_BODY}"
+        return 1
+    fi
+
+    if [ -z "$SERVICE_PLAN_ID" ] || [ "$SERVICE_PLAN_ID" == "null" ]; then
+        echo "Error: Could not resolve Service Plan ID."
+        return 1
+    fi
+
+    echo "Setting '${SERVICE_PLAN_NAME}' as default service plan (auto-contracted on signup)..."
+    SET_DEFAULT_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X PUT "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/service_plans/${SERVICE_PLAN_ID}/default.json" \
+        -d "access_token=${ACCESS_TOKEN}")
+    HTTP_CODE=$(echo "${SET_DEFAULT_RESPONSE}" | tail -n1)
+    if [ "$HTTP_CODE" -ne 200 ]; then
+        echo "Failed to set default service plan. HTTP ${HTTP_CODE}. Response:"
+        echo "${SET_DEFAULT_RESPONSE}" | sed '$d'
+        return 1
+    fi
+    echo "Default service plan set."
+
     echo "Model '${model_name}' registered successfully."
 
-    read -p "Do you want to activate this new service for all existing accounts? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        activate_service_for_all_accounts "${PRODUCT_ID}"
-    fi
+    activate_service_for_all_accounts "${PRODUCT_ID}"
 }
 
 activate_service_for_all_accounts() {
