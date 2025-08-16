@@ -223,7 +223,7 @@ post-install-steps() {
 update_developer_portal() {
     echo "--- Updating 3scale Developer Portal ---"
 
-    PORTAL_DIR="examples/models-as-a-service/components/3scale/portal"
+    PORTAL_DIR="examples/models-as-a-service/components/3scale-instance/portal"
     if [ ! -d "$PORTAL_DIR" ]; then
         echo "Portal content directory not found at ${PORTAL_DIR}"
         echo "Please ensure the portal files are located there. You may need to copy them from the original models-aas-demo/3scale/portal directory."

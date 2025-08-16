@@ -1,0 +1,5 @@
+apiVersion: v2
+name: redhat-sso-instance
+description: Deploy Red Hat SSO (Keycloak) instance and realm
+version: 0.1.0
+appVersion: "latest" 

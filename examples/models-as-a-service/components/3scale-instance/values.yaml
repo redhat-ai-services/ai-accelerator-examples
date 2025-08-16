@@ -1,0 +1,10 @@
+# Default values for 3scale-instance chart
+
+# namespace: The namespace where the APIManager instance resides
+namespace: 3scale
+
+# storageClassName: The storage class for the 3scale system file storage
+storageClassName: ocs-storagecluster-cephfs
+
+# wildcardDomain: The cluster apps wildcard domain. If not set or set to the placeholder, a post-install job will try to detect it automatically from Routes.
+wildcardDomain: "Needtopatchit" 

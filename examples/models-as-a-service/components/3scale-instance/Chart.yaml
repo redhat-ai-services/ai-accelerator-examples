@@ -1,0 +1,5 @@
+apiVersion: v2
+name: 3scale-instance
+description: A Helm chart for deploying the 3scale APIManager instance and custom policies
+version: 0.1.0
+appVersion: "2.15" 

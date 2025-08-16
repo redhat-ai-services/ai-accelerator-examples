@@ -1,0 +1,5 @@
+apiVersion: v2
+name: redhat-sso-operator
+description: Install Red Hat SSO (Keycloak) operator resources
+version: 0.1.0
+appVersion: "latest" 

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: 3scale-operator
+description: A Helm chart for installing the 3scale operator (namespace, OperatorGroup, Subscription)
+version: 0.1.0
+appVersion: "2.15" 

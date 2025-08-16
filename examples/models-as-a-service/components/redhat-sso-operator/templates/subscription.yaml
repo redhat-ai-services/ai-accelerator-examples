@@ -10,4 +10,4 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   channel: {{ .Values.channel | default "stable" }}
-  installPlanApproval: Automatic
+  installPlanApproval: Automatic 

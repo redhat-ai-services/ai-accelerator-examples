@@ -1,6 +1,5 @@
-# Default values for redhat-sso
+# Default values for redhat-sso-instance
 namespace: redhat-sso
-channel: stable
 keycloak:
   name: redhat-sso
   realm:

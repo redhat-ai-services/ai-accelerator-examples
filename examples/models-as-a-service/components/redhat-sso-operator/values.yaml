@@ -1,0 +1,3 @@
+# Default values for redhat-sso-operator
+namespace: redhat-sso
+channel: stable 

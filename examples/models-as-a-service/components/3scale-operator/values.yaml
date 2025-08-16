@@ -1,0 +1,6 @@
+# Default values for 3scale-operator chart
+
+# namespace: The namespace to deploy the 3scale operator
+namespace: 3scale
+# channel: The 3scale operator channel to subscribe to
+channel: threescale-2.15 

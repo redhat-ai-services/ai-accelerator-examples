@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   name: llm-metrics
   schema:
@@ -18,4 +19,4 @@ spec:
     name: LLM Monitor
     summary: Expose prometheus metrics to monitor LLM token usage
     version: '0.1'
-  version: '0.1'
+  version: '0.1' 

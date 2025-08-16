@@ -14,4 +14,4 @@ spec:
     id: {{ .Values.keycloak.realm.name | default "maas" }}
     realm: {{ .Values.keycloak.realm.name | default "maas" }}
     displayName: {{ .Values.keycloak.realm.displayName | default "MaaS on RHOAI" }}
-    enabled: true
+    enabled: true 

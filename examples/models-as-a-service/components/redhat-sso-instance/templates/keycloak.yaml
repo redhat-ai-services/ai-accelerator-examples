@@ -11,4 +11,4 @@ metadata:
 spec:
   externalAccess:
     enabled: true
-  instances: 1
+  instances: 1 
