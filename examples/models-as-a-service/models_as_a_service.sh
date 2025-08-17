@@ -566,7 +566,16 @@ configure_sso_developer_portal() {
     else
         echo "Creating RH-SSO integration..."
         local CLIENT_SECRET
-        CLIENT_SECRET=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients/$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients?clientId=3scale" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')/client-secret" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.value')
+        # Ensure we have a fresh Keycloak admin token before querying
+        refresh_keycloak_token || return 1
+        # Resolve the 3scale client ID robustly (array or object response)
+        local CLIENT_ID_3SCALE_RESOLVED
+        CLIENT_ID_3SCALE_RESOLVED=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients?clientId=3scale" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r 'if type=="array" and length>0 then .[0].id elif type=="object" and has("id") then .id else "" end')
+        if [ -z "${CLIENT_ID_3SCALE_RESOLVED}" ]; then
+            echo "Error: Unable to resolve Keycloak client ID for '3scale'."
+            return 1
+        fi
+        CLIENT_SECRET=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients/${CLIENT_ID_3SCALE_RESOLVED}/client-secret" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.value // empty')
         if [ -z "$CLIENT_SECRET" ] || [ "$CLIENT_SECRET" == "null" ]; then
             echo "Error: CLIENT_SECRET is not set. Cannot create SSO integration."
             return 1
