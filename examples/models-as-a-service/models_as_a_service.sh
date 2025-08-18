@@ -26,7 +26,7 @@ check_commands() {
 prerequisite() {
     echo "--- Running prerequisite steps for Models as a Service ---"
 
-    check_commands jq yq oc git podman
+    check_commands jq yq oc git
 
     # 3scale RWX Storage check
     echo "The 3scale operator requires a storage class with ReadWriteMany (RWX) access mode."
@@ -114,6 +114,42 @@ prerequisite() {
     # else
     #     echo "Skipping Git push. Please commit and push the changes manually for the deployment to work correctly."
     # fi
+
+    # Update wildcard domain
+    echo "Discovering cluster wildcard domain..."
+    local WILDCARD_DOMAIN_APPS=$(oc get ingresscontroller -n openshift-ingress-operator default -o jsonpath='{.status.domain}')
+    if [ -z "$WILDCARD_DOMAIN_APPS" ]; then
+        echo "Could not automatically determine wildcard domain."
+        exit 1
+    else
+        echo "Found wildcard domain: ${WILDCARD_DOMAIN_APPS}"
+    fi
+
+
+    # TODO: this secret is required by 3scale; here, for testing purposes, I'm copying one from the cluster
+
+    # Create namespace if it doesn't exist
+    if ! oc get namespace 3scale &>/dev/null; then
+        echo "Creating namespace 3scale..."
+        oc create namespace 3scale && \
+            oc label namespace 3scale argocd.argoproj.io/managed-by=openshift-gitops
+    fi
+
+    # Create secret only if it doesn't exist
+    if ! oc get secret threescale-registry-auth -n 3scale &>/dev/null; then
+        echo "Creating threescale-registry-auth secret..."
+        oc extract secret/pull-secret -n openshift-config --keys=.dockerconfigjson --to=- \
+            | grep -v .dockerconfigjson \
+            | oc create secret generic threescale-registry-auth -n 3scale --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=/dev/stdin
+    else
+        echo "Secret threescale-registry-auth already exists in 3scale namespace."
+    fi
+
+
+    # Save substitutions for later usage
+    subs+=(
+        "WILDCARD_DOMAIN=${WILDCARD_DOMAIN_APPS}"
+    )
 
     echo "--- Prerequisite steps completed. ---"
 }

@@ -76,12 +76,25 @@ deploy_example(){
 
     echo
     echo "Deploying example: ${chose_example_overlay_path}"
-    kustomize build ${chose_example_overlay_path} | oc apply -n ${ARGOCD_NS} -f -
+
+    sed_args=()
+    for sub in "${subs[@]}"; do
+        key="${sub%%=*}"
+        val="${sub#*=}"
+        sed_args+=("-e" "s|${key}|${val}|g")
+    done
+
+    kustomize build ${chose_example_overlay_path} \
+        | sed "${sed_args[@]}" \
+        | oc apply -n ${ARGOCD_NS} -f -
 }
 
 
 main(){
     choose_example
+
+    # Initialize subs array
+    subs=()
 
     if [ "$chosen_example" == "models-as-a-service" ]; then
         source "${CHOSEN_EXAMPLE_PATH}/models_as_a_service.sh"

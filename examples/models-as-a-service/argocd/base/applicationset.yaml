@@ -23,6 +23,9 @@ spec:
         path: '{{ .path.path }}'
         helm:
           releaseName: '{{ .path.basename }}-release'
+          parameters:
+            - name: wildcardDomain
+              value: "WILDCARD_DOMAIN"
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ .path.basename | replace "-instance" "" | replace "-operator" "" }}'
