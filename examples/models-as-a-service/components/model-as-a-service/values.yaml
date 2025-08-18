@@ -16,10 +16,23 @@ model:
   # More models available at: https://github.com/redhat-ai-services/modelcar-catalog
   uri: oci://quay.io/redhat-ai-services/modelcar-catalog:granite-3.3-2b-instruct
 
-
 image:
   # -- The vLLM model server image
   image: 'quay.io/modh/vllm'
 
   # -- The tag or sha for the model server image
   tag: rhoai-2.22-cuda
+
+endpoint:
+  externalRoute:
+    # -- Creates an externally accessible route for the model endpoint
+    enabled: true
+
+  auth:
+    # -- Secures the model endpoint and creates a role to grant permissions to service accounts
+    enabled: true
+
+    # -- Creates service accounts with permissions to access the secured endpoint
+    serviceAccounts:
+      - name: model-as-a-service-sa
+    
