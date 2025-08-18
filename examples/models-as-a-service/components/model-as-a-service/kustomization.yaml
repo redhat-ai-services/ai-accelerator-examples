@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: model-as-a-service
+
+labels:
+  - pairs:
+      opendatahub.io/dashboard: "true"
+
+resources:
+  - namespace.yaml
+
+helmCharts:
+  - name: vllm-kserve
+    releaseName: maas-granite-release
+    version: 0.5.9
+    repo: https://redhat-ai-services.github.io/helm-charts/
+    skipTests: true
+    valuesFile: values.yaml
+
+patches:
+  - target:
+      kind: ServingRuntime
+    patch: |-
+      - op: add
+        path: "/metadata/annotations/opendatahub.io~1apiProtocol"
+        value: REST

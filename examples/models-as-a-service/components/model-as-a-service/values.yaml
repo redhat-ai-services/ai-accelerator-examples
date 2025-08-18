@@ -1,0 +1,25 @@
+# reference values.yaml:
+# https://raw.githubusercontent.com/redhat-ai-services/helm-charts/refs/heads/main/charts/vllm-kserve/values.yaml
+
+modelInstanceName: maas-granite-3-2-2b
+
+model:
+
+  # -- Additional vLLM arguments to be used to start the model.  For more documentation on available arguments see https://docs.vllm.ai/en/latest/serving/engine_args.html
+  args:
+    - "--gpu-memory-utilization=0.90"
+
+  # -- Option to set how the storage will be configured.  Options: "uri" and "s3"
+  mode: uri
+
+  # -- The Uri to use for storage.  Mode must be set to "uri" to use this option.  Options: "oci://" and "pvc://"
+  # More models available at: https://github.com/redhat-ai-services/modelcar-catalog
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:granite-3.3-2b-instruct
+
+
+image:
+  # -- The vLLM model server image
+  image: 'quay.io/modh/vllm'
+
+  # -- The tag or sha for the model server image
+  tag: rhoai-2.22-cuda
