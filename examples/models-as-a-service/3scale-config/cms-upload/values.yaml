@@ -1,0 +1,50 @@
+hook:
+  pre:
+    image:
+      repository: quay.io/cloud-architecture-workshop/wait-for-routes-job
+      pullPolicy: IfNotPresent
+      tag: "d41c5da-native"
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    hostPattern: ""
+    argocd:
+      enabled: true
+      syncwave: "-1"
+
+  post:
+    image:
+      repository: quay.io/cloud-architecture-workshop/trigger-pipelines-job
+      pullPolicy: IfNotPresent
+      tag: "7e399ca"
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    argocd:
+      enabled: true
+      syncwave: "1"
+
+git:
+  repo: https://github.com/redhat-gpte-devopsautomation/private-llm-aas.git
+  ref: main
+
+cms:
+  image: ghcr.io/fwmotion/3scale-cms:v2.0.1
+  contextDir: ./3scale/devportal
+  command: "upload -u"
+
+loop:
+  prefix: user
+  count: 1

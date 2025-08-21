@@ -1,0 +1,26 @@
+{{ if .Values.apimanager.llmMetrics -}}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: CustomPolicyDefinition
+metadata:
+  name: {{ .Values.apimanager.llmMetrics.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: {{ .Values.apimanager.llmMetrics.name }}
+  schema:
+    $schema: 'http://json-schema.org/draft-07/schema#'
+    configuration:
+      properties:
+        someAttr:
+          description: Some attribute
+          type: integer
+      type: object
+    name: LLM Monitor
+    summary: Expose prometheus metrics to monitor LLM token usage
+    version: "{{ .Values.apimanager.llmMetrics.version }}"
+  version: "{{ .Values.apimanager.llmMetrics.version }}"
+{{- end }}
+

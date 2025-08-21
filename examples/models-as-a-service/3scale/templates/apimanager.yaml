@@ -1,0 +1,32 @@
+---
+apiVersion: apps.3scale.net/v1alpha1
+kind: APIManager
+metadata:
+  name: {{ .Values.apimanager.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  wildcardDomain: {{ .Values.apimanager.wildcardDomain }}
+  tenantName: {{ .Values.apimanager.tenantName }}
+  resourceRequirementsEnabled: false
+  system:
+    fileStorage:
+      persistentVolumeClaim:
+        storageClassName: {{ .Values.apimanager.storageClassName }}
+  {{ if .Values.apimanager.llmMetrics -}}
+  apicast:
+    stagingSpec:
+      customPolicies:
+        - name: {{ .Values.apimanager.llmMetrics.name }}
+          version: "{{ .Values.apimanager.llmMetrics.version }}"
+          secretRef:
+             name: {{ .Values.apimanager.llmMetrics.name }}
+    productionSpec:
+      customPolicies:
+        - name: {{ .Values.apimanager.llmMetrics.name }}
+          version: "{{ .Values.apimanager.llmMetrics.version }}"
+          secretRef:
+             name: {{ .Values.apimanager.llmMetrics.name }}
+  {{- end }}

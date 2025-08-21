@@ -1,0 +1,27 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cms-upload
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.cmsUpload.repoURL }}
+    targetRevision: {{ .Values.cmsUpload.targetRevision }}
+    path: {{ .Values.cmsUpload.path }}
+    helm:
+      values: |
+        hook:
+          pre:
+            hostPattern: maas-admin.{{ .Values.deployer.domain }}
+        git:
+          repo: {{ .Values.cmsUpload.repoURL }}
+          ref: {{ .Values.cmsUpload.targetRevision }}
+        cms:
+          contextDir: {{ .Values.cmsUpload.contextDir }}/devportal
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: 3scale
+  syncPolicy:
+    automated: {}

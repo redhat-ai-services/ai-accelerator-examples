@@ -1,0 +1,38 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cms-upload.name" . }}-hook-pre
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
+  annotations: 
+    {{- if .Values.hook.pre.argocd.enabled }}
+    {{- include "cms-upload-hook-pre.argocd-syncwave" . | nindent 4 }}
+    {{- else }}
+    "helm.sh/hook": pre-install
+    {{- end }}
+spec:
+  selector: {}
+  template:
+    metadata:
+      name: {{ include "cms-upload.name" . }}-hook
+    spec:
+      serviceAccountName: {{ include "cms-upload.name" . }}-hook
+      securityContext:
+        {{- toYaml .Values.hook.pre.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.hook.pre.securityContext | nindent 12 }}
+          image: "{{ .Values.hook.pre.image.repository }}:{{ .Values.hook.pre.image.tag }}"
+          imagePullPolicy: {{ .Values.hook.pre.image.pullPolicy }}
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: HOST
+              value: {{ .Values.hook.pre.hostPattern }}
+            - name: COUNT
+              value: "{{ .Values.loop.count }}"
+      restartPolicy: Never

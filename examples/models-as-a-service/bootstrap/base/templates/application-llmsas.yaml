@@ -1,0 +1,21 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: model-serving 
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-options: Validate=false  
+  labels:
+      component: bootstrap
+      purpose: model-serving
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.llmaas.repoURL }}
+    targetRevision: {{ .Values.llmaas.targetRevision }}
+    path: {{ .Values.llmaas.path }}
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated: {}

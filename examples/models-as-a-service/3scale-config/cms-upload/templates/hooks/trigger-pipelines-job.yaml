@@ -1,0 +1,38 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cms-upload.name" . }}-hook-post
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
+  annotations: 
+    {{- if .Values.hook.post.argocd.enabled }}
+    {{- include "cms-upload-hook-post.argocd-syncwave" . | nindent 4 }}
+    {{- else }}
+    "helm.sh/hook": post-install
+    {{- end }}
+spec:
+  selector: {}
+  template:
+    metadata:
+      name: {{ include "cms-upload.name" . }}-hook
+    spec:
+      serviceAccountName: {{ include "cms-upload.name" . }}-hook
+      securityContext:
+        {{- toYaml .Values.hook.post.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.hook.post.securityContext | nindent 12 }}
+          image: "{{ .Values.hook.post.image.repository }}:{{ .Values.hook.post.image.tag }}"
+          imagePullPolicy: {{ .Values.hook.post.image.pullPolicy }}
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: EVENTLISTENER
+              value: upload-cms
+            - name: COUNT
+              value: "{{ .Values.loop.count }}"
+      restartPolicy: Never

@@ -1,0 +1,98 @@
+{{- range .Values.apis }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Backend
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: "{{ .name }}"
+  systemName: "{{ .name }}"
+  privateBaseURL: "{{ .backend.privateBaseURL }}"
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Product
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: "{{ .name }}"
+  systemName: "{{ .name }}"
+  backendUsages:
+    {{ .name }}:
+      path: {{ .backend.path }}
+  {{- $sections := dict
+    "deployment" .deployment
+    "policies" .policies
+    "metrics" .metrics
+    "methods" .methods
+    "mappingRules" .mappingRules
+  -}}
+  {{- range $key, $value := $sections }}
+  {{- if $value }}
+  {{ $key }}:
+    {{- toYaml $value | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  applicationPlans:
+    standard:
+      name: "Standard Plan"
+      {{- if .applicationPlans.standard.appsRequireApproval }}
+      appsRequireApproval: {{ .applicationPlans.standard.appsRequireApproval }}
+      {{- end }}
+      published: true
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ActiveDoc
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: "{{ .name }}"
+  activeDocOpenAPIRef:
+    url: {{ .activeDocOpenAPIRef }}
+  skipSwaggerValidations: true
+  productSystemName: {{ .name }}
+  published: true
+# Creating an application is failing with ArgoCD because it needs proper waiting
+# time for DeveloperAccount and DeveloperUser to be created.
+# ---
+# apiVersion: capabilities.3scale.net/v1beta1
+# kind: Application
+# metadata:
+#   name: {{ .name }}
+#   namespace: {{ $.Values.namespace }}
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "8"
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+# spec:
+#   name: {{ .name }}
+#   description: "Default application for {{ .name }}"
+#   applicationPlanName: standard
+#   productCR:
+#     name: {{ .name }}
+#   accountCR:
+#     name: {{ .name }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ProxyConfigPromote
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "9"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  productCRName: {{ .name }}
+  production: true
+  deleteCR: false
+{{- end }}

@@ -1,0 +1,53 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: upload-cms
+spec:
+  params:
+    - name: GIT_REPO
+      type: string
+    - name: GIT_REF
+      type: string
+    - name: CMS_IMAGE
+      type: string
+    - name: CMS_CONTEXT_DIR
+      type: string
+    - name: CMS_COMMAND
+      type: string
+  workspaces:
+    - name: working-dir
+    - name: provider-details
+  tasks:
+    - name: clone-contents
+      taskRef:
+        kind: Task
+        name: git-clone
+      params:
+        - name: URL
+          value: $(params.GIT_REPO)
+        - name: REVISION
+          value: $(params.GIT_REF)
+      workspaces:
+        - name: output
+          workspace: working-dir
+    - name: upload-cms
+      runAfter:
+        - clone-contents
+      taskRef:
+        kind: Task
+        name: 3scale-cms
+      params:
+        - name: context-directory
+          value: $(params.CMS_CONTEXT_DIR)
+        - name: copy-default-cmsignore
+          value: 'false'
+        - name: threescale-cms-command
+          value: $(params.CMS_COMMAND)
+        - name: threescale-cms-image
+          value: $(params.CMS_IMAGE)
+      workspaces:
+        - name: source
+          workspace: working-dir
+        - name: provider-details
+          workspace: provider-details

@@ -1,0 +1,95 @@
+{{ if .Values.patcher.routes -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.patcher.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.patcher.name }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.patcher.namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.patcher.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+data:
+  playbook.yaml: |
+    ---
+    - name: routes patcher
+      hosts: localhost
+      connection: local
+      gather_facts: false
+      tasks:
+      - name: get routes in {{ .Values.patcher.namespace }} namespace
+        kubernetes.core.k8s_info:
+          api_version: route.openshift.io/v1
+          kind: Route
+          namespace: "{{ .Values.patcher.namespace }}"
+          label_selectors:
+            {{- toYaml .Values.patcher.routes.label_selectors | nindent 10 }}
+        register: route_info
+        until: route_info.resources | length > 0
+        retries: 15
+        delay: 5
+      - name: annotate routes in {{ .Values.patcher.namespace }} namespace
+        kubernetes.core.k8s:
+          state: patched
+          api_version: route.openshift.io/v1
+          kind: Route
+          namespace: "{{ .Values.patcher.namespace }}"
+          name: "{{`{{ item }}`}}"
+          definition:
+            metadata:
+              annotations:
+                {{- range $key, $value := .Values.patcher.routes.annotations }}
+                {{ $key }}: {{ quote $value }}
+                {{- end }}
+        loop: "{{`{{ route_info.resources | map(attribute='metadata.name') | list }}`}}"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.patcher.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: {{ .Values.patcher.name }}
+      restartPolicy: Never
+      containers:
+      - name: ansible
+        image: {{ .Values.images.multicloud }}
+        command: ["ansible-playbook"]
+        args: ["/ansible/playbook.yaml", "-vvv"]
+        volumeMounts:
+        - name: ansible
+          mountPath: /ansible
+      volumes:
+      - name: ansible
+        configMap:
+          name: {{ .Values.patcher.name }}
+{{- end }}

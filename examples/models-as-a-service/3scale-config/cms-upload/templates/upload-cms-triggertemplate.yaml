@@ -1,0 +1,46 @@
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: upload-cms-template
+spec:
+  params:
+    - description: The git repository.
+      name: gitRepository
+    - description: The git branch.
+      name: gitRef
+    - description: The cms api image
+      name: cmsImage
+    - description: cms context dir in repo
+      name: cmsContextDir
+    - description: cms API command
+      name: cmsCommand
+    - description: 3scale-tenant
+      name: threescaleTenant
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: upload-cms-run-
+      spec:
+        params:
+          - name: GIT_REPO
+            value: $(tt.params.gitRepository)
+          - name: GIT_REF
+            value: $(tt.params.gitRef)
+          - name: CMS_IMAGE
+            value: $(tt.params.cmsImage)
+          - name: CMS_CONTEXT_DIR
+            value: $(tt.params.cmsContextDir)
+          - name: CMS_COMMAND
+            value: $(tt.params.cmsCommand)
+        pipelineRef:
+          name: upload-cms
+        serviceAccountName: pipeline
+        workspaces:
+          - name: working-dir
+            persistentVolumeClaim:
+              claimName: workspace-upload-cms-pvc
+          - name: provider-details
+            secret:
+              secretName: 3scale-maas-tenant-secret

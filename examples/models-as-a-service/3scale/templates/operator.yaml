@@ -1,0 +1,26 @@
+{{ if .Values.operator -}}
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: {{ .Values.operator.name }}-group
+  namespace: {{ .Values.namespace }}
+spec:
+  targetNamespaces:
+    - {{ .Values.namespace }}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: {{ .Values.operator.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  channel: {{ .Values.operator.channel }}
+  installPlanApproval: {{ .Values.operator.installPlanApproval }}
+  name: {{ .Values.operator.name }}
+  source: {{ .Values.operator.source }}
+  sourceNamespace: {{ .Values.operator.sourceNamespace }}
+  {{- if .Values.operator.startingCSV }}
+  startingCSV: {{ .Values.operator.startingCSV }}
+  {{- end }}
+{{- end }}

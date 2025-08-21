@@ -1,0 +1,72 @@
+# Default values for 3scale.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: 3scale
+
+# Set to empty to NOT install the Operator
+# operator: ''
+operator:
+  name: 3scale-operator
+  channel: threescale-2.14
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # startingCSV: 3scale-operator.x.y.z
+
+apimanager:
+  name: apimanager
+  wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
+  tenantName: default
+  storageClassName: ocs-storagecluster-cephfs
+  # llmMetrics:
+  #   name: llm-metrics
+  #   version: 0.1
+
+apimanagerChecker:
+  name: "apimanager-checker"
+  syncwave: "3"
+  retries: 60
+  delay: 5
+
+# Add 3scale APIs here.
+# This will configure the Product, Backend and ActiveDocs.
+# It promotes them to production.
+# apis:
+#   - name: one
+#     activeDocOpenAPIRef: https://unknown/openapi.json
+#     backend:
+#       privateBaseURL: http://service.namespace.svc.cluster.local:8080
+#       path: /
+#   - name: other
+#     activeDocOpenAPIRef: https://unknown/openapi.json
+
+users:
+  - name: user1
+    password: openshift
+    service: granite-3dot2-8b-instruct
+
+patcher:
+  name: 3scale-patcher
+  namespace: 3scale
+  # routes:
+  #   label_selectors:
+  #   - "zync.3scale.net/route-to=apicast-production"
+  #   annotations:
+  #     haproxy.router.openshift.io/timeout: "180s"
+
+images:
+  multicloud: quay.io/agnosticd/ee-multicloud:v0.1.2
+  toolbox: registry.redhat.io/3scale-amp2/toolbox-rhel9:1.11.0
+
+# Using sub-chart helper-status-checker
+helper-status-checker:
+  enabled: true
+  approver: false
+  checks:
+    - operatorName: 3scale-operator
+      namespace:
+        name: 3scale
+      syncwave: "1"
+      serviceAccount:
+        name: "3scale-status-checker"

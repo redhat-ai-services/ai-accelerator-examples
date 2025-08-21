@@ -1,0 +1,88 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: 3scale-cms
+spec:
+  description: >-
+    3scale-cms task to interact with the 3scale Content Management API
+  params:
+  - name: threescale-cms-image
+    type: string
+    description: Reference to the 3scale-cms image for execution
+    default: >-
+      ghcr.io/fwmotion/3scale-cms:latest
+  - name: context-directory
+    type: string
+    description: >-
+      Path relative to the `source` workspace to use as root of the "local"
+      root, for comparison/upload/download with the content in 3scale
+    default: .
+  - name: copy-default-cmsignore
+    type: string
+    description: >-
+      Flag indicating whether the default `.cmsignore` file should be copied
+      into the `source` workspace before executing the 3scale-cms command
+    default: 'false'
+  - name: threescale-cms-command
+    type: string
+    description: >-
+      The 3scale-cms command to execute, including any subcommands or
+      parameters
+    default: info details
+  steps:
+  - name: 3scale-cms
+    image: $(params.threescale-cms-image)
+    env:
+    - name: THREESCALE_CMS_ROOT
+      value: $(workspaces.source.path)/$(params.context-directory)
+    - name: PROVIDER_DETAILS_PATH
+      value: $(workspaces.provider-details.path)
+    workingDir: /home/jboss
+    script: >
+      #!/bin/bash
+
+      set -eu
+
+      # Don't `set -x` because that would expose credentials to the log
+
+      if [ -r "${PROVIDER_DETAILS_PATH}/insecure" ]; then
+        INSECURE_FLAG="--insecure=$(<"${PROVIDER_DETAILS_PATH}/insecure")"
+      else
+        INSECURE_FLAG="--insecure=false"
+      fi
+
+      if [ -r "${PROVIDER_DETAILS_PATH}/token" ] && [ -n "$(<"${PROVIDER_DETAILS_PATH}/token")" ]; then
+        # When using access token, provider key is unused; however, it is still
+        # required to maintain parameter positions. Due to this, "abcd" is used.
+        PROVIDER_KEY="--access-token=$(<"${PROVIDER_DETAILS_PATH}/token") abcd"
+      else
+        PROVIDER_KEY="$(<"${PROVIDER_DETAILS_PATH}/provider-key")"
+      fi
+
+      PROVIDER_DOMAIN="$(<"${PROVIDER_DETAILS_PATH}/adminURL")"
+
+      if [ "$(params.copy-default-cmsignore)" = "true" ]; then
+        cp -a /cms/.cmsignore "${THREESCALE_CMS_ROOT}"
+      fi
+
+      java \
+        -Djava.util.logging.manager=org.jboss.logmanager.LogManager \
+        -jar quarkus-run.jar \
+        $INSECURE_FLAG \
+        $PROVIDER_KEY \
+        $PROVIDER_DOMAIN \
+        $(params.threescale-cms-command)
+  workspaces:
+  - name: source
+    description: >-
+      A Workspace containing the "local" root for comparison/upload/download
+      of CMS content. The path relative to this workspace may be specified in
+      the `context-directory` param.
+  - name: provider-details
+    description: >-
+      A Workspace containing the information required to interact with 3scale,
+      such as the Admin Portal base URL and either a Provider Key or a
+      Personal Access Token. (Note that when a Personal Access Token is used,
+      it must have permission to the Content Management API. Binding a Secret
+      to this Workspace is strongly recommended over other volume types.

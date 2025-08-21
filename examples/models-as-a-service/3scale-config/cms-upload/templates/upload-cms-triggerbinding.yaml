@@ -1,0 +1,19 @@
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: upload-cms-binding
+spec:
+  params:
+    - name: gitRepository
+      value: {{ .Values.git.repo }}
+    - name: gitRef
+      value: {{ .Values.git.ref }}
+    - name: cmsImage
+      value: {{ .Values.cms.image }}
+    - name: cmsContextDir
+      value: {{ .Values.cms.contextDir }}
+    - name: cmsCommand
+      value: {{ .Values.cms.command }}
+    - name: threescaleTenant
+      value: $(body.tenant)

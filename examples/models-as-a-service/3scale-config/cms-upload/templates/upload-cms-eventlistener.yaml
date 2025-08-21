@@ -1,0 +1,15 @@
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: upload-cms
+spec:
+  namespaceSelector: {}
+  resources: {}
+  serviceAccountName: pipeline
+  triggers:
+    - name: upload-cms
+      bindings:
+        - ref: upload-cms-binding
+      template:
+        ref: upload-cms-template

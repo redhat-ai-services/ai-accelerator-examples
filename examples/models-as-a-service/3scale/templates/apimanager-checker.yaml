@@ -1,0 +1,92 @@
+{{ if .Values.apimanagerChecker -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.apimanagerChecker.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.apimanagerChecker.name }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.apimanagerChecker.name }}
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.apimanagerChecker.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+data:
+  playbook.yaml: |
+    ---
+    - name: apimanager status checker
+      hosts: localhost
+      connection: local
+      gather_facts: false
+      tasks:
+        - name: check apimanager status
+          kubernetes.core.k8s_info:
+            api_version: apps.3scale.net/v1alpha1
+            kind: APIManager
+            name: "{{ .Values.apimanager.name }}"
+            namespace: "{{ .Values.namespace }}"
+          register: r_apimanager
+          retries: "{{ .Values.apimanagerChecker.retries }}"
+          delay: "{{ .Values.apimanagerChecker.delay }}"
+          until:
+          - r_apimanager is defined
+          - r_apimanager.resources is defined
+          - r_apimanager.resources | length > 0
+          - r_apimanager.resources[0].status is defined
+          - r_apimanager.resources[0].status.deployments is defined
+          - r_apimanager.resources[0].status.deployments.ready is defined
+          - r_apimanager.resources[0].status.deployments.ready | length == 15
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.apimanagerChecker.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: {{ .Values.apimanagerChecker.name }}
+      restartPolicy: Never
+      containers:
+      - name: ansible
+        image: {{ .Values.images.multicloud }}
+        command: ["ansible-playbook"]
+        args: ["/ansible/playbook.yaml"]
+        volumeMounts:
+        - name: ansible
+          mountPath: /ansible
+      volumes:
+      - name: ansible
+        configMap:
+          name: {{ .Values.apimanagerChecker.name }}
+{{- end }}

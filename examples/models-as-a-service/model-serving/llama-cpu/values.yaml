@@ -1,0 +1,29 @@
+fullnameOverride: llama-32-1b-instruct-cpu
+
+model:
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:llama-3.2-1b-instruct
+  args:
+    - --max-model-len=2000
+
+deploymentMode: RawDeployment
+
+endpoint:
+  externalRoute:
+    enabled: false
+
+image: 
+  image: quay.io/rh-aiservices-bu/vllm-cpu-openai-ubi9
+  tag: "0.3"
+  runtimeVersionOverride: 0.7.3
+
+tolerations: []
+
+resources:
+  requests:
+    cpu: '2'
+    memory: 2Gi
+    nvidia.com/gpu: null
+  limits:
+    cpu: '4'
+    memory: 8Gi
+    nvidia.com/gpu: null

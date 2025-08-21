@@ -1,0 +1,24 @@
+# Default values for bootstrap.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+deployer:
+  domain: apps.cluster-guid.guid.sandbox.opentlc.com
+
+threeScale:
+  namespace: 3scale
+  repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+  targetRevision: main
+  path: examples/models-as-a-service/3scale
+  channel: threescale-2.15
+  startingCSV: 3scale-operator.v0.12.3
+
+cmsUpload:
+  repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+  targetRevision: main
+  path: examples/models-as-a-service/3scale-config/cms-upload
+
+llmaas:
+  repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+  targetRevision: main
+  path: examples/models-as-a-service/model-serving
