@@ -22,6 +22,8 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   orgName: "{{ .name }}"
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
 ---
 kind: DeveloperUser
 apiVersion: capabilities.3scale.net/v1beta1
@@ -32,11 +34,13 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  username: {{ .name }}
-  email: {{ .name }}@domain.com
+  username: '{{ .name }}'
+  email: '{{ .name }}@domain.com'
   role: admin
   passwordCredentialsRef:
-    name: {{ .name }}-pwd
+    name: '{{ .name }}-pwd'
   developerAccountRef:
-    name: {{ .name }}
+    name: '{{ .name }}'
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
 {{- end }}

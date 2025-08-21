@@ -12,6 +12,8 @@ spec:
   name: "{{ .name }}"
   systemName: "{{ .name }}"
   privateBaseURL: "{{ .backend.privateBaseURL }}"
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: Product
@@ -47,6 +49,8 @@ spec:
       appsRequireApproval: {{ .applicationPlans.standard.appsRequireApproval }}
       {{- end }}
       published: true
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: ActiveDoc
@@ -63,6 +67,8 @@ spec:
   skipSwaggerValidations: true
   productSystemName: {{ .name }}
   published: true
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
 # Creating an application is failing with ArgoCD because it needs proper waiting
 # time for DeveloperAccount and DeveloperUser to be created.
 # ---

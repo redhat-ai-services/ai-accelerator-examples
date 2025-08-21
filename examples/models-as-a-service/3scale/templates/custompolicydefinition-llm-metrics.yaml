@@ -22,5 +22,7 @@ spec:
     summary: Expose prometheus metrics to monitor LLM token usage
     version: "{{ .Values.apimanager.llmMetrics.version }}"
   version: "{{ .Values.apimanager.llmMetrics.version }}"
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
 {{- end }}
 
