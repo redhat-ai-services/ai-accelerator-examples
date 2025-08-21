@@ -5,6 +5,7 @@ namespace: openshift-gitops
 
 helmGlobals:
   chartHome: ..
+
 helmCharts:
 - name: base
   releaseName: maas-bootstrap

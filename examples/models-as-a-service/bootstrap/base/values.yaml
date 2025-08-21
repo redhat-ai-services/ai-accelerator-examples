@@ -18,6 +18,11 @@ cmsUpload:
   targetRevision: main
   path: examples/models-as-a-service/3scale-config/cms-upload
 
+minio:
+  repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+  targetRevision: main
+  path: examples/models-as-a-service/minio-instance
+
 llmaas:
   repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
   targetRevision: main

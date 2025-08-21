@@ -5,7 +5,6 @@ namespace: minio
 
 resources:
   - namespace.yaml
-  - secret-admin-user.yaml
 
 helmCharts:
   - name: minio
