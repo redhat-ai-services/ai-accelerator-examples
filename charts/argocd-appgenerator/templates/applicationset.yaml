@@ -23,6 +23,9 @@ spec:
     spec:
       project: {{ include "argocd-appgenerator.fullname" . }}
       syncPolicy:
+        managedNamespaceMetadata:
+          labels:
+            rhoai-example: models-as-a-service
         automated:
           prune: false
           selfHeal: true

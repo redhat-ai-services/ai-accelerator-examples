@@ -5,7 +5,7 @@ metadata:
   name: 3scale
   namespace: openshift-gitops
 spec:
-  project: default
+  project: models-as-a-service
   sources:
     - repoURL: {{ .Values.threeScale.repoURL }}
       targetRevision: {{ .Values.threeScale.targetRevision }}

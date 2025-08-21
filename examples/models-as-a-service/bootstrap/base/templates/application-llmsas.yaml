@@ -10,7 +10,7 @@ metadata:
       component: bootstrap
       purpose: model-serving
 spec:
-  project: default
+  project: models-as-a-service
   source:
     repoURL: {{ .Values.llmaas.repoURL }}
     targetRevision: {{ .Values.llmaas.targetRevision }}

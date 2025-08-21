@@ -5,7 +5,7 @@ metadata:
   name: cms-upload
   namespace: openshift-gitops
 spec:
-  project: default
+  project: models-as-a-service
   source:
     repoURL: {{ .Values.cmsUpload.repoURL }}
     targetRevision: {{ .Values.cmsUpload.targetRevision }}

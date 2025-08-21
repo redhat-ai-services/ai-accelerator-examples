@@ -1,6 +1,14 @@
+# reference values.yaml:
+# https://raw.githubusercontent.com/redhat-ai-services/helm-charts/refs/heads/main/charts/vllm-kserve/values.yaml
+
 fullnameOverride: llama-32-1b-instruct-cpu
 
 model:
+  # -- Option to set how the storage will be configured.  Options: "uri" and "s3"
+  mode: uri
+
+  # -- The Uri to use for storage.  Mode must be set to "uri" to use this option.  Options: "oci://" and "pvc://"
+  # More models available at: https://github.com/redhat-ai-services/modelcar-catalog
   uri: oci://quay.io/redhat-ai-services/modelcar-catalog:llama-3.2-1b-instruct
   args:
     - --max-model-len=2000

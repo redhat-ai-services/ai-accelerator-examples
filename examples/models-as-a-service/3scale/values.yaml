@@ -8,7 +8,7 @@ namespace: 3scale
 # operator: ''
 operator:
   name: 3scale-operator
-  channel: threescale-2.14
+  channel: threescale-2.15
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
@@ -18,7 +18,6 @@ apimanager:
   name: apimanager
   wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
   tenantName: default
-  storageClassName: ocs-storagecluster-cephfs
   # llmMetrics:
   #   name: llm-metrics
   #   version: 0.1

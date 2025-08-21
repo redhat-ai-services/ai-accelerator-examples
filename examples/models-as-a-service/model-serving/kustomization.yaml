@@ -6,6 +6,6 @@ commonLabels:
   component: aiworkshop
 
 resources:
-- ./llama-cpu/
-- namespace.yaml
-- 3scale-network-policy.yaml
+  - namespace.yaml
+  - ./llama-cpu/
+  - 3scale-network-policy.yaml
