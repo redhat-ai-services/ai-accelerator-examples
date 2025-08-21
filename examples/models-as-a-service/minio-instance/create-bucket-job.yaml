@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-create-bucket
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+    "helm.sh/hook-weight": "6"
+spec:
+  completions: 1
+  template:
+    metadata:
+      name: minio-create-bucket
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: minio-bucket
+        image: quay.io/minio/mc
+        env:
+          - name: MC_CONFIG_DIR
+            value: /tmp/.mc
+          - name: MINIO_URL
+            value: http://minio.minio.svc:9000
+          - name: MINIO_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minio
+                key: AWS_ACCESS_KEY_ID
+          - name: MINIO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minio
+                key: AWS_SECRET_ACCESS_KEY
+          - name: MINIO_BUCKET
+            value: "3scale-maas"
+        command:
+          - "/bin/sh"
+          - "-c"
+          - |-
+            sleep 30 && \
+              echo "Setting up minio alias" && \
+              mc alias set minio-3scale "$MINIO_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" && \
+              echo "Creating bucket" && \
+              mc mb "minio-3scale/$MINIO_BUCKET" --ignore-existing && \
+              echo "Bucket created"

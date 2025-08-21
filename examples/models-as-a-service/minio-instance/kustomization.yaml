@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: minio
+
+resources:
+  - namespace.yaml
+  - secret-admin-user.yaml
+
+helmCharts:
+  - name: minio
+    releaseName: minio-release
+    namespace: minio
+    version: 0.1.2
+    repo: https://redhat-ai-services.github.io/helm-charts/
+    skipTests: true
+    valuesFile: values.yaml

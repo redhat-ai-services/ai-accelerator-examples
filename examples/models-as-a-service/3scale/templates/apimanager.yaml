@@ -13,8 +13,9 @@ spec:
   resourceRequirementsEnabled: false
   system:
     fileStorage:
-      persistentVolumeClaim:
-        storageClassName: {{ .Values.apimanager.storageClassName }}
+      simpleStorageService:
+        configurationSecretRef:
+          name: minio-s3-auth
   {{ if .Values.apimanager.llmMetrics -}}
   apicast:
     stagingSpec:
