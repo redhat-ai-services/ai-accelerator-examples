@@ -26,97 +26,50 @@ check_commands() {
 prerequisite() {
     echo "--- Running prerequisite steps for Models as a Service ---"
 
-    check_commands jq yq oc git podman
+    check_commands jq yq oc git
 
     # Patch ArgoCD instance to avoid 3scale operator race conditions
-    oc patch argocd/openshift-gitops -n openshift-gitops --type=json -p='[{"op": "add", "path": "/spec/controller/env", "value": [{ "name": "ARGOCD_SYNC_WAVE_DELAY", "value": "10" }]}]'
+    oc patch argocd/openshift-gitops -n openshift-gitops \
+         --type=json -p='[{"op": "add", "path": "/spec/controller/env", "value": [{ "name": "ARGOCD_SYNC_WAVE_DELAY", "value": "10" }]}]'
 
-    # 3scale RWX Storage check
-    echo "The 3scale operator requires a storage class with ReadWriteMany (RWX) access mode."
-    echo "Red Hat OpenShift Data Foundation (ODF) is the recommended way to provide this."
-    read -p "Do you have an RWX-capable storage class available in your cluster? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "An RWX storage class is required. Please install OpenShift Data Foundation (ODF) or another RWX-capable storage solution and then re-run the script."
-        exit 1
+    # Force restart of ArgoCD application controllerinstance
+    echo "ArgoCD instance patched. Waiting 5 seconds for the change to take effect..."
+    sleep 5
+    oc rollout restart statefulset/openshift-gitops-application-controller -n openshift-gitops
+
+    # Discover cluster's wildcard domain
+    echo "Discovering cluster wildcard domain..."
+    WILDCARD_DOMAIN=$(oc get ingresscontroller -n openshift-ingress-operator default -o jsonpath='{.status.domain}')
+    if [ -z "$WILDCARD_DOMAIN" ]; then
+        echo "Could not automatically determine wildcard domain."
+        return 1
+    else
+        echo "Found wildcard domain: ${WILDCARD_DOMAIN}"
     fi
-    
-    # read -p "Please enter the name of the RWX storage class [default: ocs-storagecluster-cephfs]: " rwx_storage_class
-    # rwx_storage_class=${rwx_storage_class:-ocs-storagecluster-cephfs}
-    # while [ -z "$rwx_storage_class" ]; do
-    #     echo "Storage class name cannot be empty."
-    #     read -p "Please enter the name of the RWX storage class [default: ocs-storagecluster-cephfs]: " rwx_storage_class
-    #     rwx_storage_class=${rwx_storage_class:-ocs-storagecluster-cephfs}
-    # done
 
-    # VALUES_YAML_3SCALE_PATH="examples/models-as-a-service/components/3scale/values.yaml"
+    # Save the wildcard domain as a helm parameter for later usage
+    # TODO: keep this list updated with the new parameters
+    helm_params+=(
+        ["WILDCARD_DOMAIN"]="${WILDCARD_DOMAIN}"
+        ["apimanager.wildcardDomain"]="${WILDCARD_DOMAIN}"
+        ["deployer.domain"]="${WILDCARD_DOMAIN}"
+    )
 
-    # # Update wildcard domain
-    # echo "Discovering cluster wildcard domain..."
-    # WILDCARD_DOMAIN_APPS=$(oc get ingresscontroller -n openshift-ingress-operator default -o jsonpath='{.status.domain}')
-    # if [ -z "$WILDCARD_DOMAIN_APPS" ]; then
-    #     echo "Could not automatically determine wildcard domain. Please update ${VALUES_YAML_3SCALE_PATH} manually."
-    # else
-    #     echo "Found wildcard domain: ${WILDCARD_DOMAIN_APPS}"
-    #     echo "Updating 3scale instance with wildcard domain..."
-    #     yq e -i '.wildcardDomain = "'"${WILDCARD_DOMAIN_APPS}"'"' "$VALUES_YAML_3SCALE_PATH"
-    #     echo "File ${VALUES_YAML_3SCALE_PATH} updated."
-    # fi
+    # Prepare repository parameters
+    GIT_REPO="${helm_params["GIT_REPO"]}"
+    GIT_BRANCH="${helm_params["GIT_BRANCH"]}"
 
-    # echo "Updating 3scale instance with storage class: ${rwx_storage_class}"
-    # yq e -i '.storageClassName = "'"${rwx_storage_class}"'"' "$VALUES_YAML_3SCALE_PATH"
-    # echo "File ${VALUES_YAML_3SCALE_PATH} updated."
-
-    # # Update ApplicationSet with current Git repo and branch
-    # echo "--- Updating ApplicationSet configuration ---"
-    # APPLICATIONSET_YAML_PATH="examples/models-as-a-service/argocd/base/applicationset.yaml"
-    
-    # CURRENT_REPO_URL=$(git config --get remote.origin.url)
-    # CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-    # if [ -z "$CURRENT_REPO_URL" ] || [ -z "$CURRENT_BRANCH" ]; then
-    #     echo "Error: Could not determine current Git repository URL or branch."
-    #     echo "Please ensure you are in a valid Git repository."
-    #     return 1
-    # fi
-
-    # echo "Updating ApplicationSet to use your repository:"
-    # echo "  Repo URL: ${CURRENT_REPO_URL}"
-    # echo "  Branch: ${CURRENT_BRANCH}"
-
-    # yq e -i '.spec.generators[0].git.repoURL = "'"${CURRENT_REPO_URL}"'"' "${APPLICATIONSET_YAML_PATH}"
-    # yq e -i '.spec.generators[0].git.revision = "'"${CURRENT_BRANCH}"'"' "${APPLICATIONSET_YAML_PATH}"
-    # yq e -i '.spec.template.spec.source.repoURL = "'"${CURRENT_REPO_URL}"'"' "${APPLICATIONSET_YAML_PATH}"
-    # yq e -i '.spec.template.spec.source.targetRevision = "'"${CURRENT_BRANCH}"'"' "${APPLICATIONSET_YAML_PATH}"
-
-    # echo "ApplicationSet updated successfully."
-
-    # # Commit and push changes
-    # echo "--- Pushing configuration changes to Git ---"
-    # read -p "Do you want to commit and push the configuration changes to your repository? (y/n) " -n 1 -r
-    # echo
-    # if [[ $REPLY =~ ^[Yy]$ ]]; then
-    #     git config --global credential.helper 'cache --timeout=3600'
-
-    #     git add "${VALUES_YAML_3SCALE_PATH}" "${APPLICATIONSET_YAML_PATH}"
-        
-    #     # Check if there are changes to commit
-    #     if git diff --staged --quiet; then
-    #         echo "No configuration changes to commit."
-    #     else
-    #         git commit -m "Update MaaS configuration for deployment"
-    #         echo "Pushing changes to branch '${CURRENT_BRANCH}'..."
-    #         if git push origin "HEAD:${CURRENT_BRANCH}"; then
-    #             echo "Configuration pushed to repository successfully."
-    #         else
-    #             echo "Error: Failed to push configuration to repository."
-    #             echo "Please check your credentials and ensure you have push permissions."
-    #             return 1
-    #         fi
-    #     fi
-    # else
-    #     echo "Skipping Git push. Please commit and push the changes manually for the deployment to work correctly."
-    # fi
+    # TODO: keep this list updated with the new parameters
+    helm_params+=(
+        ["threeScale.repoURL"]="${GIT_REPO}"
+        ["cmsUpload.repoURL"]="${GIT_REPO}"
+        ["minio.repoURL"]="${GIT_REPO}"
+        ["llmaas.repoURL"]="${GIT_REPO}"
+        ["threeScale.targetRevision"]="${GIT_BRANCH}"
+        ["cmsUpload.targetRevision"]="${GIT_BRANCH}"
+        ["minio.targetRevision"]="${GIT_BRANCH}"
+        ["llmaas.targetRevision"]="${GIT_BRANCH}"
+    )
 
     echo "--- Prerequisite steps completed. ---"
 }
