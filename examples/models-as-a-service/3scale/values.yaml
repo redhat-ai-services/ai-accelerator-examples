@@ -45,11 +45,11 @@ users:
     password: openshift
     service: granite-3dot2-8b-instruct
 
-keycloaks:
-  keycloak-maas:
-    realm: 3scale
-    clientId: 3scale-client
-    clientSecret: 3scale-client-secret
+keycloak:
+  name: redhat-sso
+  realm: 3scale
+  clientId: 3scale-client
+  clientSecret: REPLACE_WITH_GENERATED_SECRET
 
 patcher:
   name: 3scale-patcher
