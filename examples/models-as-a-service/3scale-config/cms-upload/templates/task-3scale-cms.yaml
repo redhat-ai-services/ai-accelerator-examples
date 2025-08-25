@@ -40,7 +40,7 @@ spec:
       value: $(workspaces.provider-details.path)
     workingDir: /home/jboss
     script: >
-      #!/bin/bash
+      #!/usr/bin/env bash
 
       set -eu
 
