@@ -1,0 +1,39 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: '{{ .Values.keycloak.name | default "redhat-sso" }}'
+  namespace: '{{ .Values.namespace | default "redhat-sso" }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+  labels:
+    app: '{{ .Values.keycloak.name | default "redhat-sso" }}'
+    rhoai-example: maas
+    rhoai-example-component: redhat-sso-instance
+spec:
+  instances: 1
+  startOptimized: false
+  db:
+    vendor: postgres
+    host: postgres-db
+    port: 5432
+    database: keycloak
+    usernameSecret:
+      name: postgres-db
+      key: POSTGRES_USER
+    passwordSecret:
+      name: postgres-db
+      key: POSTGRES_PASSWORD
+  ingress:
+    enabled: true
+    className: openshift-default
+  proxy:
+    headers: xforwarded
+  hostname:
+    hostname: 'https://{{ .Values.keycloak.name | default "redhat-sso" }}-{{ .Values.namespace | default "redhat-sso" }}.{{ .Values.clusterDomainUrl }}'
+    backchannelDynamic: true
+    strict: false
+  http:
+    tlsSecret: keycloak-tls-cert
+  additionalOptions:
+    - name: http-management-relative-path
+      value: /management

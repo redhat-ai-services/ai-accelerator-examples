@@ -1,0 +1,19 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rhsso-instance
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-options: Validate=false
+  labels:
+    component: bootstrap
+spec:
+  project: models-as-a-service
+  source:
+    repoURL: '{{ .Values.rhssoInstance.repoURL }}'
+    targetRevision: '{{ .Values.rhssoInstance.targetRevision }}'
+    path: '{{ .Values.rhssoInstance.path }}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rhsso
