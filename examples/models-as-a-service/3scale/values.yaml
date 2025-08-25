@@ -45,6 +45,12 @@ users:
     password: openshift
     service: granite-3dot2-8b-instruct
 
+keycloaks:
+  keycloak-maas:
+    realm: 3scale
+    clientId: 3scale-client
+    clientSecret: 3scale-client-secret
+
 patcher:
   name: 3scale-patcher
   namespace: 3scale

@@ -1,66 +1,79 @@
 {{- range .Values.users }}
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ .name }}-application
-  namespace: {{ $.Values.namespace }}
-  annotations:
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/sync-wave: "10"
-spec:
-  backoffLimit: 9
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-      - name: toolbox
-        image: {{ $.Values.images.toolbox }}
-        command: ["/bin/bash", "-c"]
-        args:
-        - |
-          set -e
-          CLEAN_ADMIN_URL=$(echo $ADMIN_URL | sed 's|^https://||')
-          3scale remote add maas "https://$TOKEN@$CLEAN_ADMIN_URL"
-          3scale service list maas
-
-          echo "Creating application for {{ .name }}..."
-          3scale application apply maas {{ .name }} \
-            --account="{{ .name }}" \
-            --name="{{ .name }} app" \
-            --description="Application for {{ .name }}" \
-            --plan="standard" \
-            --service="{{ .service }}"
-
-          echo "Job completed."
-        env:
-        - name: ADMIN_URL
-          valueFrom:
-            secretKeyRef:
-              name: 3scale-maas-tenant-secret
-              key: adminURL
-        - name: TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: 3scale-maas-tenant-secret
-              key: token
----
-{{- end }}
-
-# apiVersion: capabilities.3scale.net/v1beta1
-# kind: Application
+# ---
+# apiVersion: batch/v1
+# kind: Job
 # metadata:
-#   name: alice
-#   namespace: 3scale
+#   name: {{ .name }}-application
+#   namespace: {{ $.Values.namespace }}
 #   annotations:
-#     # argocd.argoproj.io/sync-wave: "1"
-#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 #     argocd.argoproj.io/hook: PostSync
+#     argocd.argoproj.io/sync-wave: "10"
 # spec:
-#   name: alice
-#   description: "Default application for user"
-#   applicationPlanName: standard
-#   productCR:
-#     name: granite-3dot2-8b-instruct
-#   accountCR:
-#     name: "alice-account"
+#   backoffLimit: 9
+#   template:
+#     spec:
+#       restartPolicy: Never
+#       containers:
+#       - name: toolbox
+#         image: {{ $.Values.images.toolbox }}
+#         command: ["/bin/bash", "-c"]
+#         args:
+#         - |
+#           set -e
+#           CLEAN_ADMIN_URL=$(echo $ADMIN_URL | sed 's|^https://||')
+#           3scale remote add maas "https://$TOKEN@$CLEAN_ADMIN_URL"
+#           3scale service list maas
+
+#           echo "Creating application for {{ .name }}..."
+#           3scale application apply maas {{ .name }} \
+#             --account="{{ .name }}" \
+#             --name="{{ .name }} app" \
+#             --description="Application for {{ .name }}" \
+#             --plan="standard" \
+#             --service="{{ .service }}"
+#
+#           echo "Job completed."
+#         env:
+#         - name: ADMIN_URL
+#           valueFrom:
+#             secretKeyRef:
+#               name: 3scale-maas-tenant-secret
+#               key: adminURL
+#         - name: TOKEN
+#           valueFrom:
+#             secretKeyRef:
+#               name: 3scale-maas-tenant-secret
+#               key: token
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Application
+metadata:
+  name: '{{ .name }}'
+  namespace: 3scale
+  annotations:
+    argocd.argoproj.io/sync-wave: "99"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: '{{ .name }}'
+  description: "Application for {{ .name }}"
+  applicationPlanName: standard
+  productCR:
+    name:'{{ .service }}'
+  accountCR:
+    name: "{{ .name }}"
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ApplicationAuth
+metadata:
+  name: applicationauth-sample
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  applicationCRName: '{{ .name }}'
+  generateSecret: true
+  authSecretRef:
+    name: '{{ .name }}-auth'
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
+{{- end }}

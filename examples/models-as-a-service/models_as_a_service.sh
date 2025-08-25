@@ -157,23 +157,25 @@ post-install-steps() {
     fi
     echo "Found 3scale admin host: ${ADMIN_HOST}"
 
-    read -p "Update 3scale developer portal with the latest content? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        update_developer_portal
-    fi
+    # read -p "Update 3scale developer portal with the latest content? (y/n) " -n 1 -r
+    # echo
+    # if [[ $REPLY =~ ^[Yy]$ ]]; then
+    #     update_developer_portal
+    # fi
 
-    configure_sso_developer_portal
+    # configure_sso_developer_portal
 
-    echo "--- Post-install steps completed! ---"
+    # echo "--- Post-install steps completed! ---"
     
-    handle_model_registration_loop
+    # handle_model_registration_loop
 
-    # Create the developer user at the end of post-install
-    create_developer_user
+    # # Create the developer user at the end of post-install
+    # create_developer_user
 
     # Clean up the temp file if it exists
-    rm -f -- "${RESPONSE_FILE-}"
+    if [ -f "${RESPONSE_FILE-}" ]; then
+        rm -f -- "${RESPONSE_FILE-}"
+    fi
 }
 
 update_developer_portal() {
