@@ -28,6 +28,9 @@ prerequisite() {
 
     check_commands jq yq oc git podman
 
+    # Patch ArgoCD instance to avoid 3scale operator race conditions
+    oc patch argocd/openshift-gitops -n openshift-gitops --type=json -p='[{"op": "add", "path": "/spec/controller/env", "value": [{ "name": "ARGOCD_SYNC_WAVE_DELAY", "value": "10" }]}]'
+
     # 3scale RWX Storage check
     echo "The 3scale operator requires a storage class with ReadWriteMany (RWX) access mode."
     echo "Red Hat OpenShift Data Foundation (ODF) is the recommended way to provide this."
