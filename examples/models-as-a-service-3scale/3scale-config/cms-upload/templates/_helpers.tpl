@@ -68,6 +68,7 @@ ArgoCD Syncwave Hook Pre3
 {{- if .Values.hook.pre.argocd }}
 {{- if and (.Values.hook.pre.argocd.syncwave) (.Values.hook.pre.argocd.enabled) -}}
 argocd.argoproj.io/sync-wave: "{{ .Values.hook.pre.argocd.syncwave }}"
+argocd.argoproj.io/hook: PreSync
 {{- else }}
 {{- "{}" }}
 {{- end }}

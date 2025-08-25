@@ -5,9 +5,9 @@ metadata:
   name: minio
   namespace: {{ .Values.namespace | default .Release.Namespace }}
   annotations:
-    argocd.argoproj.io/sync-options: Validate=false  
+    argocd.argoproj.io/sync-options: Validate=false
   labels:
-      component: bootstrap
+    component: bootstrap
 spec:
   project: {{ include "maas-bootstrap.fullname" . }}
   source:

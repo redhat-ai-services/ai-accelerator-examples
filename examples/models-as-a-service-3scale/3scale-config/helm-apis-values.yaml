@@ -11,6 +11,18 @@ apis:
           userkey:
             authUserKey: Authorization
             credentials: authorization
+        # authentication:
+        #   oidc:
+        #     issuerType: "keycloak"
+        #     issuerEndpointRef:
+        #       name: keycloak-maas
+        #     authenticationFlow:
+        #       standardFlowEnabled: false
+        #       implicitFlowEnabled: false
+        #       serviceAccountsEnabled: true
+        #       directAccessGrantsEnabled: false
+        #     jwtClaimWithClientID: "azp"
+        #     jwtClaimWithClientIDType: "plain"
     policies:
       - name: cors
         enabled: true

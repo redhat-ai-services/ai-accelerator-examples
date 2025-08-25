@@ -19,3 +19,11 @@ spec:
     server: https://kubernetes.default.svc
   syncPolicy:
     automated: {}
+    syncOptions:
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data/issuerEndpoint
+        - /stringData/issuerEndpoint
