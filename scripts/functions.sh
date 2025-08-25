@@ -20,3 +20,17 @@ get_git_basename(){
   REPO_BASENAME=$(echo ${REPO_URL} | sed -E  ${QUERY})
   echo ${REPO_BASENAME}
 }
+
+# $1 is the name of the array (declared as, for example, `declare -A params=(["key1"]="value1" ["key2"]="value2")`)
+# then call `$(expand_params_to_helm_params params)`
+# to get the list of parameters for helm
+expand_params_to_helm_params() {
+    declare -n inhash=$1
+    declare -a outlist
+
+    for param in "${!inhash[@]}"; do
+        outlist+=("--set" "${param}"="${inhash[$param]}")
+    done
+
+    echo "${outlist[@]}"
+}

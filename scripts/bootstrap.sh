@@ -94,7 +94,7 @@ deploy_example(){
 
     echo
     echo "Example name: ${example_name}"
-    echo "GITHUB_URL: ${GITHUB_URL}"
+    echo "GIT_REPO: ${GIT_REPO}"
     echo "GIT_BRANCH: ${GIT_BRANCH}"
     echo "chosen_example_overlay_path: ${chosen_example_overlay_path}"
     echo
@@ -113,20 +113,23 @@ deploy_example(){
 
 set_repo_url(){
     GIT_REPO=$(git config --get remote.origin.url)
-    GIT_REPO_BASENAME=$(get_git_basename ${GIT_REPO})
-    GITHUB_URL="https://github.com/${GIT_REPO_BASENAME}.git"
-    
+
     echo
-    echo "Current repository URL: ${GITHUB_URL}"
+    echo "Current repository URL: ${GIT_REPO}"
     echo
     read -p "Press Enter to use this URL, or enter a new repository URL: " user_input
     
     if [ -n "$user_input" ]; then
-        GITHUB_URL="$user_input"
-        echo "Updated repository URL to: ${GITHUB_URL}"
+        GIT_REPO="$user_input"
+        echo "Updated repository URL to: ${GIT_REPO}"
     else
-        echo "Using repository URL: ${GITHUB_URL}"
+        echo "Using repository URL: ${GIT_REPO}"
     fi
+
+    # Save as a helm parameter for later usage
+    helm_params+=(
+        ["GIT_REPO"]="${GIT_REPO}"
+    )
 }
 
 set_repo_branch(){
@@ -143,9 +146,17 @@ set_repo_branch(){
     else
         echo "Using repository branch: ${GIT_BRANCH}"
     fi
+
+    # Save as a helm parameter for later usage
+    helm_params+=(
+        ["GIT_BRANCH"]="${GIT_BRANCH}"
+    )
 }
 
 main(){
+    # Initialize helm params array
+    declare -A helm_params
+
     set_repo_url
     set_repo_branch
     choose_example
