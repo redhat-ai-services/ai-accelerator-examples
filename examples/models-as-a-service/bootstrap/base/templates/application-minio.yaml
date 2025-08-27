@@ -11,8 +11,8 @@ metadata:
 spec:
   project: models-as-a-service
   source:
-    repoURL: {{ .Values.minio.repoURL }}
-    targetRevision: {{ .Values.minio.targetRevision }}
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
     path: {{ .Values.minio.path }}
   destination:
     server: https://kubernetes.default.svc

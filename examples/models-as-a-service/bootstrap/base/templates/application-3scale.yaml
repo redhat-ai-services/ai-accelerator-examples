@@ -7,8 +7,8 @@ metadata:
 spec:
   project: models-as-a-service
   sources:
-    - repoURL: {{ .Values.threeScale.repoURL }}
-      targetRevision: {{ .Values.threeScale.targetRevision }}
+    - repoURL: {{ .Values.repoURL }}
+      targetRevision: {{ .Values.targetRevision }}
       path: {{ .Values.threeScale.path }}
       helm:
         valueFiles:
@@ -25,6 +25,7 @@ spec:
             llmMetrics:
               name: llm-metrics
               version: 0.1
+            storageClassName: {{ .Values.threeScale.storageClassName }}
           patcher:
             routes:
               label_selectors:
@@ -41,11 +42,11 @@ spec:
                 serviceAccount:
                   name: "3scale-status-checker"
           users:
-          - name: user1
+          - name: dev1
             password: openshift
             service: llama-32-1b-instruct-cpu
-    - repoURL: {{ .Values.threeScale.repoURL }}
-      targetRevision: {{ .Values.threeScale.targetRevision }}
+    - repoURL: {{ .Values.repoURL }}
+      targetRevision: {{ .Values.targetRevision }}
       ref: values
   destination:
     namespace: {{ .Values.threeScale.namespace }}

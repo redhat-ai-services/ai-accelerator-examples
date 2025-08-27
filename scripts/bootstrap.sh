@@ -92,11 +92,26 @@ deploy_example(){
     echo "chosen_example_overlay_path: ${chosen_example_overlay_path}"
     echo
 
-    helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
+    if [ "${example_name}" == "models-as-a-service" ]; then
+        cluster_domain_name=$(oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}')
+        helm upgrade -i ${example_name}-bootstrap ./examples/models-as-a-service/bootstrap/base -n ${ARGOCD_NS} \
+        --set threeScale.storageClassName="ocs-storagecluster-cephfs" \
         --set fullnameOverride=${example_name} \
+        --set deployer.domain=${cluster_domain_name} \
         --set repoURL=${GITHUB_URL} \
-        --set revision=${GIT_BRANCH} \
-        --set directories[0].path="${chosen_example_overlay_path}"
+        --set targetRevision=${GIT_BRANCH}
+    else
+        helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
+            --set fullnameOverride=${example_name} \
+            --set repoURL=${GITHUB_URL} \
+            --set revision=${GIT_BRANCH} \
+            --set directories[0].path="${chosen_example_overlay_path}"
+    fi
+
+
+
+
+
 }
 
 

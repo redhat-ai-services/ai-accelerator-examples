@@ -7,8 +7,8 @@ metadata:
 spec:
   project: models-as-a-service
   source:
-    repoURL: {{ .Values.cmsUpload.repoURL }}
-    targetRevision: {{ .Values.cmsUpload.targetRevision }}
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
     path: {{ .Values.cmsUpload.path }}
     helm:
       values: |
@@ -16,8 +16,8 @@ spec:
           pre:
             hostPattern: maas-admin.{{ .Values.deployer.domain }}
         git:
-          repo: {{ .Values.cmsUpload.repoURL }}
-          ref: {{ .Values.cmsUpload.targetRevision }}
+          repo: {{ .Values.repoURL }}
+          ref: {{ .Values.targetRevision }}
         cms:
           contextDir: {{ .Values.cmsUpload.contextDir }}/devportal
   destination:

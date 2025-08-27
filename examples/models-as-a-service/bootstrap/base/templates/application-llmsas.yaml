@@ -12,8 +12,8 @@ metadata:
 spec:
   project: models-as-a-service
   source:
-    repoURL: {{ .Values.llmaas.repoURL }}
-    targetRevision: {{ .Values.llmaas.targetRevision }}
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
     path: {{ .Values.llmaas.path }}
   destination:
     server: https://kubernetes.default.svc
