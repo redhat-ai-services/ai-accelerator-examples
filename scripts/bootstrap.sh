@@ -100,8 +100,8 @@ deploy_example(){
         --set repoURL=${GITHUB_URL} \
         --set revision=${GIT_BRANCH} \
         --set clusterDomainUrl=${CLUSTER_DOMAIN_NAME} \
-        --set kustomizeDirectories[0].path="${chosen_example_overlay_path}"
-
+        --set kustomizeDirectories[0].path="${chosen_example_overlay_path}" \
+        --set helmDirectories[0].path="${example_name}/helm-charts/**"
 }
 
 
