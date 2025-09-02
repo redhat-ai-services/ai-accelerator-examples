@@ -20,7 +20,7 @@ spec:
             startingCSV: {{ .Values.threeScale.startingCSV }}
             installPlanApproval: Automatic
           apimanager:
-            wildcardDomain: {{ .Values.deployer.domain }}
+            wildcardDomain: {{ .Values.clusterDomainUrl }}
             tenantName: maas
             llmMetrics:
               name: llm-metrics

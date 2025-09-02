@@ -14,7 +14,7 @@ spec:
       values: |
         hook:
           pre:
-            hostPattern: maas-admin.{{ .Values.deployer.domain }}
+            hostPattern: maas-admin.{{ .Values.clusterDomainUrl }}
         git:
           repo: {{ .Values.repoURL }}
           ref: {{ .Values.targetRevision }}

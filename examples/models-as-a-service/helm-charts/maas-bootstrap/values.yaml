@@ -3,9 +3,8 @@
 # Declare variables to be passed into your templates.
 fullnameOverride: "models-as-a-service"
 
-deployer:
-  domain: apps.cluster-guid.guid.sandbox.opentlc.com
-
+# To be overwritten by the main cluster appscript
+clusterDomainUrl: apps.cluster-guid.guid.sandbox.opentlc.com
 repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
 targetRevision: main
 
