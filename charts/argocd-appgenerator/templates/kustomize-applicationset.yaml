@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: {{ include "argocd-appgenerator.fullname" . }}
+  name: {{ include "argocd-appgenerator.fullname" . }}-kustomize
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: Prune=false
@@ -11,7 +11,7 @@ spec:
       repoURL: {{ .Values.repoURL }}
       revision: {{ .Values.revision }}
       directories:
-        {{- toYaml .Values.directories | nindent 8 }}
+        {{- toYaml .Values.kustomizeDirectories | nindent 8 }}
   template:
     metadata:
       name: '{{`{{path[1]}}-{{path[2]}}`}}'
