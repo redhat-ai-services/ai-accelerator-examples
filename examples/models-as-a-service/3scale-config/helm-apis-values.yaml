@@ -1,7 +1,7 @@
 # https://github.com/3scale/3scale-operator/blob/master/doc/product-reference.md
 apis:
   - name: llama-32-1b-instruct-cpu
-    activeDocOpenAPIRef: https://github.com/rhpds/etx-llmaas-gitops/raw/refs/heads/main/3scale/api_definitions/llama-32-1b-instruct.json
+    activeDocOpenAPIRef: https://github.com/redhat-ai-services/ai-accelerator-examples/raw/refs/heads/mlaas-gitops/examples/models-as-a-service/3scale-config/api_definitions/llama-32-1b-instruct-cpu.json
     backend:
       privateBaseURL: http://llama-32-1b-instruct-cpu-predictor.llm-hosting.svc.cluster.local:8080
       path: /
