@@ -17,7 +17,16 @@ deploymentMode: RawDeployment
 
 endpoint:
   externalRoute:
+    # -- Creates an externally accessible route for the model endpoint
     enabled: false
+
+  auth:
+    # -- Secures the model endpoint and creates a role to grant permissions to service accounts
+    enabled: false
+
+    # -- Creates service accounts with permissions to access the secured endpoint
+    serviceAccounts:
+      - name: llama-32-1b-instruct-cpu
 
 image:
   image: quay.io/rh-aiservices-bu/vllm-cpu-openai-ubi9

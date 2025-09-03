@@ -163,5 +163,5 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-
+# https://monokle.io/
 .monokle

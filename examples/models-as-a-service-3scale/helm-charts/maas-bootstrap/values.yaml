@@ -18,9 +18,18 @@ threeScale:
 cmsUpload:
   path: examples/models-as-a-service-3scale/3scale-config/cms-upload
   contextDir: examples/models-as-a-service-3scale/3scale-config
+  image: ghcr.io/fwmotion/3scale-cms:v2.0.1
+  command: "upload --include-unchanged --delete-missing --layout=/l_main_layout.html.liquid"
 
 minio:
   path: examples/models-as-a-service-3scale/minio-instance
+  namespace: minio
 
 llmaas:
   path: examples/models-as-a-service-3scale/model-serving
+
+rhssoOperator:
+  path: examples/models-as-a-service-3scale/redhat-sso-operator
+
+rhssoInstance:
+  path: examples/models-as-a-service-3scale/redhat-sso-instance

@@ -5,6 +5,9 @@ metadata:
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    rhoai-example: {{ include "argocd-appgenerator.fullname" . }}
+    rhoai-example-component: bootstrap-helm
 spec:
   generators:
   - git:
@@ -19,7 +22,8 @@ spec:
         argocd.argoproj.io/compare-options: IgnoreExtraneous
         argocd.argoproj.io/sync-options: Prune=false
       labels:
-        example: {{ include "argocd-appgenerator.fullname" . }}
+        rhoai-example: {{ include "argocd-appgenerator.fullname" . }}
+        rhoai-example-component: bootstrap-kustomize
     spec:
       project: {{ include "argocd-appgenerator.fullname" . }}
       syncPolicy:
@@ -37,10 +41,9 @@ spec:
         targetRevision: {{ .Values.targetRevision }}
         path: '{{`{{path}}`}}'
         helm:
-          values: |
+          valuesObject:
             clusterDomainUrl: {{ .Values.clusterDomainUrl }}
-            repoUrl: {{ .Values.repoURL }}
+            repoURL: {{ .Values.repoURL }}
             targetRevision: {{ .Values.targetRevision }}
-            namespace: {{ .Release.Namespace }}
       destination:
         server: https://kubernetes.default.svc

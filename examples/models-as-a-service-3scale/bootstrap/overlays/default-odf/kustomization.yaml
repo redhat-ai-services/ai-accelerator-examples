@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: openshift-gitops
+
+helmGlobals:
+  chartHome: ../../helm-charts
+
+helmCharts:
+  - name: base
+    releaseName: maas-bootstrap
+    version: 0.1.0
+
+patches:
+  - path: storageclass-patch.yaml
+    target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: ApplicationSet
+      name: 3scale

@@ -11,3 +11,6 @@ rules:
 
 ignore:
   - "**/charts/"
+  - "**/3scale/"
+  - "**/bootstrap/base/"
+  - "**/cms-upload/"

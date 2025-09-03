@@ -6,6 +6,6 @@ namespace: llm-hosting
 helmCharts:
 - name: vllm-kserve
   releaseName: llama-32-1b-instruct-cpu
-  version: 0.5.9
+  version: 0.5.10
   repo: https://redhat-ai-services.github.io/helm-charts/
   valuesFile: values.yaml

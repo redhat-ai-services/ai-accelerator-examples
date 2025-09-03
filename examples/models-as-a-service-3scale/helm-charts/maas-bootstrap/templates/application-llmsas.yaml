@@ -7,8 +7,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Validate=false  
   labels:
-      component: bootstrap
-      purpose: model-serving
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
 spec:
   project: {{ include "maas-bootstrap.fullname" . }}
   source:
@@ -17,13 +17,8 @@ spec:
     path: {{ .Values.llmaas.path }}
   destination:
     server: https://kubernetes.default.svc
+    namespace: llm-hosting
   syncPolicy:
     automated: {}
     syncOptions:
-      - RespectIgnoreDifferences=true
-  ignoreDifferences:
-    - group: ""
-      kind: Secret
-      jsonPointers:
-        - /data/issuerEndpoint
-        - /stringData/issuerEndpoint
+      - SkipDryRunOnMissingResource=true

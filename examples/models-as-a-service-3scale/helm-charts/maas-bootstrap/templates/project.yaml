@@ -3,6 +3,9 @@ kind: AppProject
 metadata:
   name: {{ include "maas-bootstrap.fullname" . }}
   namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
 spec:
   clusterResourceWhitelist:
     - group: '*'

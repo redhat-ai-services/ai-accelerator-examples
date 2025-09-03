@@ -4,6 +4,9 @@ kind: Application
 metadata:
   name: cms-upload
   namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
 spec:
   project: {{ include "maas-bootstrap.fullname" . }}
   source:
@@ -11,17 +14,22 @@ spec:
     targetRevision: {{ .Values.targetRevision }}
     path: {{ .Values.cmsUpload.path }}
     helm:
-      values: |
-        hook:
-          pre:
-            hostPattern: maas-admin.{{ .Values.clusterDomainUrl }}
-        git:
-          repo: {{ .Values.repoURL }}
-          ref: {{ .Values.targetRevision }}
-        cms:
+      valuesObject:
+        cmsUpload:
           contextDir: {{ .Values.cmsUpload.contextDir }}/devportal
+          image: {{ .Values.cmsUpload.image }}
+          command: {{ .Values.cmsUpload.command }}
+      parameters:
+        - name: clusterDomainUrl
+          value: {{ .Values.clusterDomainUrl }}
+        - name: repoURL
+          value: {{ .Values.repoURL }}
+        - name: targetRevision
+          value: {{ .Values.targetRevision }}
   destination:
     server: https://kubernetes.default.svc
     namespace: 3scale
   syncPolicy:
     automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true

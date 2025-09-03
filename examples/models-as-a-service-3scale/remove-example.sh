@@ -10,8 +10,8 @@ oc delete appproject models-as-a-service -n openshift-gitops --wait=false &> /de
 if oc get namespace 3scale &>/dev/null; then
     oc get applicationauth -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
     oc get application.capabilities.3scale.net -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
-    oc get developeruser -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
     oc get developeraccount -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
+    oc get developeruser -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
     oc get activedoc -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
     oc get proxyconfigpromote -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
     oc get product -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
@@ -23,6 +23,8 @@ if oc get namespace 3scale &>/dev/null; then
     oc get subscription -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
 
     #oc get tektonresult -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
+    oc get pipelinerun -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
+    oc get taskrun -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
     oc get tasks -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
     oc get eventlistener -n 3scale -l rhoai-example=maas -o name | xargs oc delete -n 3scale
 

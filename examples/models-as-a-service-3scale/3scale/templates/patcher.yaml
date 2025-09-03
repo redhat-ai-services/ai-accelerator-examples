@@ -8,6 +8,8 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -16,6 +18,8 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -33,6 +37,8 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 data:
   playbook.yaml: |
     ---
@@ -74,6 +80,8 @@ metadata:
   namespace: {{ .Values.patcher.namespace }}
   annotations:
     argocd.argoproj.io/hook: PostSync
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   backoffLimit: 3
   template:

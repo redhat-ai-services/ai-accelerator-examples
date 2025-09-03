@@ -12,38 +12,27 @@ operator:
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  # startingCSV: 3scale-operator.x.y.z
 
 apimanager:
   name: apimanager
   wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
-  tenantName: default
-  # llmMetrics:
-  #   name: llm-metrics
-  #   version: 0.1
+  tenantName: maas
+  llmMetrics:
+    name: llm-metrics
+    version: 0.1
 
 apimanagerChecker:
   name: "apimanager-checker"
-  syncwave: "3"
+  syncwave: "2"
   retries: 60
   delay: 5
-
-# Add 3scale APIs here.
-# This will configure the Product, Backend and ActiveDocs.
-# It promotes them to production.
-# apis:
-#   - name: one
-#     activeDocOpenAPIRef: https://unknown/openapi.json
-#     backend:
-#       privateBaseURL: http://service.namespace.svc.cluster.local:8080
-#       path: /
-#   - name: other
-#     activeDocOpenAPIRef: https://unknown/openapi.json
 
 users:
   - name: user1
     password: openshift
-    service: granite-3dot2-8b-instruct
+    service: llama-32-1b-instruct-cpu
+    role: admin
+    email: user@domain.com
 
 keycloak:
   name: redhat-sso
@@ -63,6 +52,158 @@ patcher:
 images:
   multicloud: quay.io/agnosticd/ee-multicloud:v0.1.2
   toolbox: registry.redhat.io/3scale-amp2/toolbox-rhel9:1.11.0
+
+apis:
+  - name: llama-32-1b-instruct-cpu
+    activeDocOpenAPIRefUrl: https://raw.githubusercontent.com/ammachado/ai-accelerator-examples/refs/heads/mlaas-gitops/examples/models-as-a-service-3scale/3scale-config/api_definitions/llama-32-1b-instruct.json
+    backend:
+      privateBaseURL: http://llama-32-1b-instruct-cpu-predictor.llm-hosting.svc.cluster.local:8080
+      path: /
+    deployment:
+      apicastHosted:
+        authentication:
+          userkey:
+            authUserKey: Authorization
+            credentials: authorization
+        # authentication:
+        #   oidc:
+        #     issuerType: "keycloak"
+        #     issuerEndpointRef:
+        #       name: keycloak-maas
+        #     authenticationFlow:
+        #       standardFlowEnabled: false
+        #       implicitFlowEnabled: false
+        #       serviceAccountsEnabled: true
+        #       directAccessGrantsEnabled: false
+        #     jwtClaimWithClientID: "azp"
+        #     jwtClaimWithClientIDType: "plain"
+    policies:
+      - name: cors
+        enabled: true
+        version: builtin
+        configuration:
+          allow_headers: ["Authorization", "Content-type", "Accept"]
+          allow_methods: []
+          allow_origin: "*"
+      - name: upstream_connection
+        enabled: true
+        version: builtin
+        configuration:
+          connect_timeout: 300
+          send_timeout: 300
+          read_timeout: 300
+      - name: llm-metrics
+        enabled: true
+        version: "0.1"
+        configuration:
+          enable_sse_support: true
+          rules:
+          - condition:
+              combine_op: and
+              operations:
+              - left: "{{status}}"
+                left_type: liquid
+                op: "=="
+                right: '200'
+                right_type: plain
+            increment: "{{ llm_usage.total_tokens }}"
+            metric: total_tokens
+          - condition:
+              combine_op: and
+              operations:
+              - left: "{{status}}"
+                left_type: liquid
+                op: "=="
+                right: '200'
+                right_type: plain
+            increment: "{{ llm_usage.prompt_tokens }}"
+            metric: prompt_tokens
+          - condition:
+              combine_op: and
+              operations:
+              - left: "{{status}}"
+                left_type: liquid
+                op: "=="
+                right: '200'
+                right_type: plain
+            increment: "{{ llm_usage.completion_tokens }}"
+            metric: completion_tokens
+      - name: apicast
+        enabled: true
+        version: builtin
+        configuration: {}
+    metrics:
+      hits:
+        friendlyName: Hits
+        unit: hit
+        description: Number of API hits
+      completion_tokens:
+        friendlyName: Completion Tokens
+        unit: token
+        description: Number of completion tokens
+      prompt_tokens:
+        friendlyName: Prompt Tokens
+        unit: token
+        description: Number of prompt tokens
+      total_tokens:
+        friendlyName: Total Tokens
+        unit: token
+        description: Number of total tokens
+    methods:
+      health:
+        friendlyName: Health
+      tokenize:
+        friendlyName: Tokenize
+      detokenize:
+        friendlyName: Detokenize
+      models:
+        friendlyName: Models
+      version:
+        friendlyName: Version
+      chat/completions:
+        friendlyName: Chat Completions
+      completions:
+        friendlyName: Completions
+      embeddings:
+        friendlyName: Embeddings
+    mappingRules:
+      - httpMethod: GET
+        pattern: "/health"
+        metricMethodRef: health
+        increment: 1
+      - httpMethod: POST
+        pattern: "/tokenize"
+        metricMethodRef: tokenize
+        increment: 1
+      - httpMethod: POST
+        pattern: "/detokenize"
+        metricMethodRef: detokenize
+        increment: 1
+      - httpMethod: GET
+        pattern: "/v1/models"
+        metricMethodRef: models
+        increment: 1
+      - httpMethod: GET
+        pattern: "/version"
+        metricMethodRef: version
+        increment: 1
+      - httpMethod: POST
+        pattern: "/v1/chat/completions"
+        metricMethodRef: chat/completions
+        increment: 1
+      - httpMethod: POST
+        pattern: "/v1/completions"
+        metricMethodRef: completions
+        increment: 1
+      - httpMethod: POST
+        pattern: "/v1/embeddings"
+        metricMethodRef: embeddings
+        increment: 1
+    applicationPlans:
+      standard:
+        name: "Standard Plan"
+        appsRequireApproval: "false"
+        published: "true"
 
 # Using sub-chart helper-status-checker
 helper-status-checker:

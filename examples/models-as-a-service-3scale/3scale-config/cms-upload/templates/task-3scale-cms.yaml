@@ -3,6 +3,8 @@ apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: 3scale-cms
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   description: >-
     3scale-cms task to interact with the 3scale Content Management API
@@ -42,9 +44,8 @@ spec:
     script: >
       #!/usr/bin/env bash
 
-      set -eu
-
       # Don't `set -x` because that would expose credentials to the log
+      set -eu
 
       if [ -r "${PROVIDER_DETAILS_PATH}/insecure" ]; then
         INSECURE_FLAG="--insecure=$(<"${PROVIDER_DETAILS_PATH}/insecure")"

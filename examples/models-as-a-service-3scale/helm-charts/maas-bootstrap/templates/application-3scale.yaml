@@ -4,6 +4,9 @@ kind: Application
 metadata:
   name: 3scale
   namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
 spec:
   project: {{ include "maas-bootstrap.fullname" . }}
   sources:
@@ -11,9 +14,16 @@ spec:
       targetRevision: {{ .Values.targetRevision }}
       path: {{ .Values.threeScale.path }}
       helm:
+        parameters:
+          - name: clusterDomainUrl
+            value: '{{ .Values.clusterDomainUrl }}'
+          - name: repoURL
+            value: '{{ .Values.repoURL }}'
+          - name: targetRevision
+            value: '{{ .Values.targetRevision }}'
         valueFiles:
           - $values/{{ .Values.cmsUpload.contextDir }}/helm-apis-values.yaml
-        values: |
+        valuesObject:
           namespace: {{ .Values.threeScale.namespace }}
           operator:
             channel: {{ .Values.threeScale.channel }}
@@ -53,3 +63,5 @@ spec:
     server: https://kubernetes.default.svc
   syncPolicy:
     automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true
