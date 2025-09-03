@@ -4,16 +4,43 @@ kind: Application
 metadata:
   name: rhsso-instance
   namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-options: Validate=false
   labels:
-    component: bootstrap
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
 spec:
   project: models-as-a-service
   source:
-    repoURL: '{{ .Values.rhssoInstance.repoURL }}'
-    targetRevision: '{{ .Values.rhssoInstance.targetRevision }}'
-    path: '{{ .Values.rhssoInstance.path }}'
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
+    path: {{ .Values.rhssoInstance.path }}
+    helm:
+      parameters:
+        - name: wildcardDomain
+          value: {{ .Values.wildcardDomain }}
   destination:
     server: https://kubernetes.default.svc
     namespace: rhsso
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: postgres-db
+      jsonPointers:
+        - /data
+        - /stringData
+    - group: ""
+      kind: Secret
+      name: minio-s3-auth
+      jsonPointers:
+        - /data/AWS_ACCESS_KEY_ID
+        - /data/AWS_SECRET_ACCESS_KEY
+        - /stringData/AWS_ACCESS_KEY_ID
+        - /stringData/AWS_SECRET_ACCESS_KEY
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data/issuerEndpoint
+        - /stringData/issuerEndpoint

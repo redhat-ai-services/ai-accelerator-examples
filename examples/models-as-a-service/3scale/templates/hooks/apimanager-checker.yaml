@@ -9,6 +9,8 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -18,6 +20,8 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -36,6 +40,8 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 data:
   playbook.yaml: |
     ---
@@ -60,7 +66,8 @@ data:
           - r_apimanager.resources[0].status is defined
           - r_apimanager.resources[0].status.deployments is defined
           - r_apimanager.resources[0].status.deployments.ready is defined
-          - r_apimanager.resources[0].status.deployments.ready | length == 15
+          - r_apimanager.resources[0].status.deployments.starting is not defined
+          - r_apimanager.resources[0].status.deployments.stopped is not defined
 ---
 apiVersion: batch/v1
 kind: Job
@@ -71,6 +78,8 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   backoffLimit: 3
   template:

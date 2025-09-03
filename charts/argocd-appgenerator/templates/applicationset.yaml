@@ -5,11 +5,14 @@ metadata:
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    rhoai-example: {{ include "argocd-appgenerator.fullname" . }}
+    rhoai-example-component: bootstrap-kustomize
 spec:
   generators:
   - git:
       repoURL: {{ .Values.repoURL }}
-      revision: {{ .Values.revision }}
+      revision: {{ .Values.targetRevision }}
       directories:
         {{- toYaml .Values.directories | nindent 8 }}
   template:
@@ -19,9 +22,10 @@ spec:
         argocd.argoproj.io/compare-options: IgnoreExtraneous
         argocd.argoproj.io/sync-options: Prune=false
       labels:
-        example: {{ include "argocd-appgenerator.fullname" . }}
+        rhoai-example: {{ include "argocd-appgenerator.fullname" . }}
+        rhoai-example-component: bootstrap-kustomize
     spec:
-      project: '{{ include "argocd-appgenerator.fullname" . }}'
+      project: {{ include "argocd-appgenerator.fullname" . }}
       syncPolicy:
         automated:
           prune: false
@@ -34,13 +38,12 @@ spec:
             maxDuration: 20m
       source:
         repoURL: {{ .Values.repoURL }}
-        targetRevision: {{ .Values.revision }}
+        targetRevision: {{ .Values.targetRevision }}
         path: '{{`{{path}}`}}'
         helm:
-          parameters:
-            - name: repoURL
-              value: '{{ .Values.repoURL }}'
-            - name: revision
-              value: '{{ .Values.revision }}'
+          valuesObject:
+            clusterDomainUrl: {{ .Values.clusterDomainUrl }}
+            repoURL: {{ .Values.repoURL }}
+            targetRevision: {{ .Values.targetRevision }}
       destination:
         server: https://kubernetes.default.svc

@@ -10,7 +10,6 @@ metadata:
     artifacthub.io/provider: Red Hat
     artifacthub.io/recommendations: |
       - url: https://tekton.dev/
-    operator.tekton.dev/last-applied-hash: e401c871564a2a3b72d83199fa87b02808d2308d98d35d2bab364a17fa0b4395
     tekton.dev/categories: Git
     tekton.dev/displayName: git
     tekton.dev/pipelines.minVersion: 0.54.0
@@ -21,6 +20,7 @@ metadata:
     app.kubernetes.io/version: 0.4.1
     operator.tekton.dev/operand-name: openshift-pipelines-addons
     operator.tekton.dev/provider-type: redhat
+    {{- include "cms-upload.labels" . | nindent 4 }}
   name: git-clone
 spec:
   description: "This object represents Git and is able to initialize and clone a remote

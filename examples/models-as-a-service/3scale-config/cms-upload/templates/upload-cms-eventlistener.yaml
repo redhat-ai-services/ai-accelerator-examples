@@ -3,6 +3,8 @@ apiVersion: triggers.tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: upload-cms
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   namespaceSelector: {}
   resources: {}

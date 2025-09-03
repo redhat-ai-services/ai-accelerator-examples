@@ -13,7 +13,6 @@ hook:
       capabilities:
         drop:
           - ALL
-    hostPattern: ""
     argocd:
       enabled: true
       syncwave: "-1"
@@ -36,15 +35,5 @@ hook:
       enabled: true
       syncwave: "1"
 
-git:
-  repo: https://github.com/redhat-gpte-devopsautomation/private-llm-aas.git
-  ref: main
-
-cms:
-  image: ghcr.io/fwmotion/3scale-cms:v2.0.1
-  contextDir: ./3scale/devportal
-  command: "upload -u"
-
 loop:
-  prefix: user
   count: 1

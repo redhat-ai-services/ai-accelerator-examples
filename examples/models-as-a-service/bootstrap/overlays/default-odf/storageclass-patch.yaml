@@ -1,0 +1,12 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: 3scale
+spec:
+  template:
+    spec:
+      source:
+        helm:
+          valuesObject:
+            apimanager:
+              storageClassName: ocs-storagecluster-cephfs

@@ -2,6 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: {{ .Values.fullnameOverride }}
+  namespace: openshift-gitops
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
 spec:
   clusterResourceWhitelist:
     - group: '*'
