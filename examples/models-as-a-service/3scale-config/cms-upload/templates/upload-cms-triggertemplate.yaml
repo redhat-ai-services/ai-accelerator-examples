@@ -3,6 +3,8 @@ apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
   name: upload-cms-template
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   params:
     - description: The git repository.
@@ -39,8 +41,13 @@ spec:
         serviceAccountName: pipeline
         workspaces:
           - name: working-dir
-            persistentVolumeClaim:
-              claimName: workspace-upload-cms-pvc
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 100Mi
           - name: provider-details
             secret:
               secretName: 3scale-maas-tenant-secret

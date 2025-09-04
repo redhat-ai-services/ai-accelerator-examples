@@ -1,0 +1,16 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhsso-operator
+  namespace: '{{ .Values.namespace | default "redhat-sso" }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: redhat-sso-operator
+spec:
+  name: rhbk-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  channel: '{{ .Values.channel | default "stable-v26.2" }}'
+  installPlanApproval: Automatic

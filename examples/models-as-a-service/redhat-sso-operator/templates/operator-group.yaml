@@ -1,0 +1,13 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: rhsso-operator-group
+  namespace: '{{ .Values.namespace | default "redhat-sso" }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: redhat-sso-operator
+spec:
+  targetNamespaces:
+  - '{{ .Values.namespace | default "redhat-sso" }}'

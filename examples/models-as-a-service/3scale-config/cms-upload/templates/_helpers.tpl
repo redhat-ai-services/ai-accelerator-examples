@@ -40,6 +40,8 @@ helm.sh/chart: {{ include "cms-upload.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+rhoai-example: maas
+rhoai-example-component: 3scale-cms-upload
 {{- end }}
 
 {{/*
@@ -68,6 +70,7 @@ ArgoCD Syncwave Hook Pre3
 {{- if .Values.hook.pre.argocd }}
 {{- if and (.Values.hook.pre.argocd.syncwave) (.Values.hook.pre.argocd.enabled) -}}
 argocd.argoproj.io/sync-wave: "{{ .Values.hook.pre.argocd.syncwave }}"
+argocd.argoproj.io/hook: PreSync
 {{- else }}
 {{- "{}" }}
 {{- end }}

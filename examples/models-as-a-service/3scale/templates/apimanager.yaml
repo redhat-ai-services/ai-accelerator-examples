@@ -7,8 +7,10 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
-  wildcardDomain: {{ .Values.apimanager.wildcardDomain }}
+  wildcardDomain: {{ .Values.clusterDomainUrl }}
   tenantName: {{ .Values.apimanager.tenantName }}
   resourceRequirementsEnabled: false
   system:
@@ -19,17 +21,23 @@ spec:
       {{- else -}}
       simpleStorageService:
         configurationSecretRef:
-          name: minio-s3-auth    
+          name: minio-s3-auth
       {{- end }}
-  {{ if .Values.apimanager.llmMetrics -}}
   apicast:
     stagingSpec:
+      labels:
+        {{- include "3scale.labels" . | nindent 8 }}
+  {{ if .Values.apimanager.llmMetrics }}
       customPolicies:
         - name: {{ .Values.apimanager.llmMetrics.name }}
           version: "{{ .Values.apimanager.llmMetrics.version }}"
           secretRef:
              name: {{ .Values.apimanager.llmMetrics.name }}
+  {{- end }}
     productionSpec:
+      labels:
+        {{- include "3scale.labels" . | nindent 8 }}
+  {{ if .Values.apimanager.llmMetrics }}
       customPolicies:
         - name: {{ .Values.apimanager.llmMetrics.name }}
           version: "{{ .Values.apimanager.llmMetrics.version }}"

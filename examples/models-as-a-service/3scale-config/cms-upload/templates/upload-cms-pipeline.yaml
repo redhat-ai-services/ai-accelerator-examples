@@ -3,6 +3,8 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: upload-cms
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   params:
     - name: GIT_REPO

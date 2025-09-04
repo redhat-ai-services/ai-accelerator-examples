@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-db
+  namespace: '{{ .Values.namespace | default "redhat-sso" }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: redhat-sso-instance
+spec:
+  serviceName: postgres-db
+  selector:
+    matchLabels:
+      app: postgres-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+        - name: postgres-db
+          image: quay.io/lib/postgres:17
+          volumeMounts:
+            - mountPath: /data
+              name: postgres-db
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-db
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-db
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-db
+                  key: POSTGRES_DB
+            - name: PGDATA
+              value: /data/pgdata
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-db
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Retain

@@ -1,0 +1,38 @@
+{{- range .Values.users }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Application
+metadata:
+  name: {{ .name }}
+  namespace: 3scale
+  annotations:
+    argocd.argoproj.io/sync-wave: "99"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
+spec:
+  name: {{ .name }}
+  description: 'Application for {{ .name }}'
+  applicationPlanName: standard
+  productCR:
+    name: {{ .service }}
+  accountCR:
+    name: {{ .name }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ApplicationAuth
+metadata:
+  name: {{ .name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
+spec:
+  applicationCRName: {{ .name }}
+  generateSecret: true
+  authSecretRef:
+    name: {{ .name }}-pwd
+  providerAccountRef:
+    name: 3scale-maas-tenant-secret
+{{- end }}
