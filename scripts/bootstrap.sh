@@ -105,7 +105,7 @@ deploy_example(){
     helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
         --set fullnameOverride=${example_name} \
         --set repoURL=${GITHUB_URL} \
-        --set revision=${GIT_BRANCH} \
+        --set targetRevision=${GIT_BRANCH} \
         --set clusterDomainUrl=${CLUSTER_DOMAIN_NAME} \
         --set kustomizeDirectories[0].path="${chosen_example_overlay_path}" \
         --set helmDirectories[0].path="${chosen_example_path}/helm-charts/**"

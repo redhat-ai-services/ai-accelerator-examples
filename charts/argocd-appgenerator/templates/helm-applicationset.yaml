@@ -34,13 +34,13 @@ spec:
             maxDuration: 20m
       source:
         repoURL: {{ .Values.repoURL }}
-        targetRevision: {{ .Values.revision }}
+        targetRevision: {{ .Values.targetRevision }}
         path: '{{`{{path}}`}}'
         helm:
           values: |
             clusterDomainUrl: {{ .Values.clusterDomainUrl }}
-            repoURL: {{ .Values.repoURL }}
-            revision: {{ .Values.revision }}
+            repoUrl: {{ .Values.repoURL }}
+            targetRevision: {{ .Values.targetRevision }}
       destination:
         server: https://kubernetes.default.svc
         namespace: {{ .Release.Namespace }}
