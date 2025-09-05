@@ -43,3 +43,4 @@ spec:
             revision: {{ .Values.revision }}
       destination:
         server: https://kubernetes.default.svc
+        namespace: {{ .Release.Namespace }}
