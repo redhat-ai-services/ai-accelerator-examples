@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ include "argocd-appgenerator.fullname" . }}-helm
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  generators:
+  - git:
+      repoURL: {{ .Values.repoURL }}
+      revision: {{ .Values.targetRevision }}
+      directories:
+        {{- toYaml .Values.helmDirectories | nindent 8 }}
+  template:
+    metadata:
+      name: '{{`{{path[1]}}-{{path[3]}}`}}'
+      annotations:
+        argocd.argoproj.io/compare-options: IgnoreExtraneous
+        argocd.argoproj.io/sync-options: Prune=false
+      labels:
+        example: {{ include "argocd-appgenerator.fullname" . }}
+    spec:
+      project: {{ include "argocd-appgenerator.fullname" . }}
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        retry:
+          limit: 5
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 20m
+      source:
+        repoURL: {{ .Values.repoURL }}
+        targetRevision: {{ .Values.targetRevision }}
+        path: '{{`{{path}}`}}'
+        helm:
+          values: |
+            clusterDomainUrl: {{ .Values.clusterDomainUrl }}
+            repoUrl: {{ .Values.repoURL }}
+            targetRevision: {{ .Values.targetRevision }}
+            namespace: {{ .Release.Namespace }}
+      destination:
+        server: https://kubernetes.default.svc

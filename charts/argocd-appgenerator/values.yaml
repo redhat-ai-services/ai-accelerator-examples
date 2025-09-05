@@ -3,6 +3,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 repoURL: "https://github.com/redhat-ai-services/ai-accelerator-examples.git"
-revision: main
+targetRevision: main
 
-directories: []
+clusterDomainUrl: "apps.cluster.example.com"
+
+kustomizeDirectories: []
+helmDirectories: []

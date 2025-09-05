@@ -27,10 +27,10 @@ choose_example(){
     CHOSEN_EXAMPLE_PATH=${examples_dir}/${chosen_example}
 }
 
-choose_example_option(){
+choose_example_kustomize_option(){
     if [ -z "$1" ]; then
-        echo "Error: No option provided to choose_example_option()"
-        echo "Usage: choose_example_option <chosen_example_path>"
+        echo "Error: No option provided to choose_example_kustomize_option()"
+        echo "Usage: choose_example_kustomize_option <chosen_example_path>"
         exit 1
     fi
     chosen_example_path=$1
@@ -69,21 +69,28 @@ choose_example_option(){
 
         CHOSEN_EXAMPLE_OPTION_PATH="${chosen_example_path}/*/overlays/${chosen_option}"
     else
-        echo "No overlays folder was found matching pattern: ${chosen_example_path}/*/overlays"
-        exit 2
+        if [ -n "${chosen_example_path}/helm-charts" ]; then
+            echo "No overlays folder was found, but helm-charts folder was found"
+            CHOSEN_EXAMPLE_OPTION_PATH=""
+        else
+            echo "No overlays folder was found matching pattern: ${chosen_example_path}/*/overlays"
+            echo "No helm-charts folder was found matching pattern: ${chosen_example_path}/helm-charts"
+            exit 2
+        fi
     fi
 }
 
 deploy_example(){
     if [ -z "$1" ]; then
         echo "Error: No option provided to deploy_example()"
-        echo "Usage: deploy_example <chosen_example_overlay_path>"
+        echo "Usage: deploy_example <example_name>"
         exit 1
     fi
-    chosen_example_overlay_path="$1"
+    chosen_example_path="${1}"
+    chosen_example_overlay_path="${1:-""}"
 
     # Extract the example name from the path (second component after splitting by "/")
-    example_name=$(echo "${chosen_example_overlay_path}" | cut -d'/' -f2)
+    example_name=$(echo "${chosen_example_path}" | cut -d'/' -f2)
 
     echo
     echo "Example name: ${example_name}"
@@ -92,28 +99,17 @@ deploy_example(){
     echo "chosen_example_overlay_path: ${chosen_example_overlay_path}"
     echo
 
-    if [ "${example_name}" == "models-as-a-service" ]; then
-        cluster_domain_name=$(oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}')
-        helm upgrade -i ${example_name}-bootstrap ./examples/models-as-a-service/bootstrap/base -n ${ARGOCD_NS} \
-        --set threeScale.storageClassName="ocs-storagecluster-cephfs" \
+    CLUSTER_DOMAIN_NAME=$(oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}')
+
+
+    helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
         --set fullnameOverride=${example_name} \
-        --set deployer.domain=${cluster_domain_name} \
         --set repoURL=${GITHUB_URL} \
-        --set targetRevision=${GIT_BRANCH}
-    else
-        helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
-            --set fullnameOverride=${example_name} \
-            --set repoURL=${GITHUB_URL} \
-            --set revision=${GIT_BRANCH} \
-            --set directories[0].path="${chosen_example_overlay_path}"
-    fi
-
-
-
-
-
+        --set targetRevision=${GIT_BRANCH} \
+        --set clusterDomainUrl=${CLUSTER_DOMAIN_NAME} \
+        --set kustomizeDirectories[0].path="${chosen_example_overlay_path}" \
+        --set helmDirectories[0].path="${chosen_example_path}/helm-charts/**"
 }
-
 
 set_repo_url(){
     GIT_REPO=$(git config --get remote.origin.url)
@@ -153,8 +149,8 @@ main(){
     set_repo_url
     set_repo_branch
     choose_example
-    choose_example_option "${CHOSEN_EXAMPLE_PATH}"
-    deploy_example "${CHOSEN_EXAMPLE_OPTION_PATH}"
+    choose_example_kustomize_option "${CHOSEN_EXAMPLE_PATH}"
+    deploy_example  "${CHOSEN_EXAMPLE_PATH}" "${CHOSEN_EXAMPLE_OPTION_PATH}"
 }
 
 # check_oc_login
