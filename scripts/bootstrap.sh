@@ -102,13 +102,14 @@ deploy_example(){
     CLUSTER_DOMAIN_NAME=$(oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}')
 
 
-    helm template -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
+    helm upgrade -i ${example_name} ./charts/argocd-appgenerator -n ${ARGOCD_NS} \
         --set fullnameOverride=${example_name} \
         --set repoURL=${GITHUB_URL} \
         --set revision=${GIT_BRANCH} \
         --set clusterDomainUrl=${CLUSTER_DOMAIN_NAME} \
         --set kustomizeDirectories[0].path="${chosen_example_overlay_path}" \
         --set helmDirectories[0].path="${chosen_example_path}/helm-charts/**"
+}
 
 set_repo_url(){
     GIT_REPO=$(git config --get remote.origin.url)
