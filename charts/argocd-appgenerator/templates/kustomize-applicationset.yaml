@@ -9,7 +9,7 @@ spec:
   generators:
   - git:
       repoURL: {{ .Values.repoURL }}
-      revision: {{ .Values.revision }}
+      revision: {{ .Values.targetRevision }}
       directories:
         {{- toYaml .Values.kustomizeDirectories | nindent 8 }}
   template:
@@ -34,7 +34,7 @@ spec:
             maxDuration: 20m
       source:
         repoURL: {{ .Values.repoURL }}
-        targetRevision: {{ .Values.revision }}
+        targetRevision: {{ .Values.targetRevision }}
         path: '{{`{{path}}`}}'
       destination:
         server: https://kubernetes.default.svc

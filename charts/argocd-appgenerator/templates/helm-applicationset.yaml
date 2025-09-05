@@ -9,7 +9,7 @@ spec:
   generators:
   - git:
       repoURL: {{ .Values.repoURL }}
-      revision: {{ .Values.revision }}
+      revision: {{ .Values.targetRevision }}
       directories:
         {{- toYaml .Values.helmDirectories | nindent 8 }}
   template:
