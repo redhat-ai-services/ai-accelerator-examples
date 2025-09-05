@@ -41,5 +41,6 @@ spec:
             clusterDomainUrl: {{ .Values.clusterDomainUrl }}
             repoUrl: {{ .Values.repoURL }}
             targetRevision: {{ .Values.targetRevision }}
+            namespace: {{ .Release.Namespace }}
       destination:
         server: https://kubernetes.default.svc
