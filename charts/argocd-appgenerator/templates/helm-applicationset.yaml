@@ -38,7 +38,7 @@ spec:
         path: '{{`{{path}}`}}'
         helm:
           values: |
-            clusterDomainUrl: {{ .Values.cluster.domainUrl }}
+            clusterDomainUrl: {{ .Values.clusterDomainUrl }}
             repoURL: {{ .Values.repoURL }}
             revision: {{ .Values.revision }}
       destination:

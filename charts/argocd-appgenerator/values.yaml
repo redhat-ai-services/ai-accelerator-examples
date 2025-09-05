@@ -5,5 +5,7 @@ fullnameOverride: ""
 repoURL: "https://github.com/redhat-ai-services/ai-accelerator-examples.git"
 revision: main
 
+clusterDomainUrl: "apps.cluster.example.com"
+
 kustomizeDirectories: []
 helmDirectories: []
