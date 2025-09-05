@@ -3,7 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: minio
-  namespace: openshift-gitops
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
   annotations:
     argocd.argoproj.io/sync-options: Validate=false  
   labels:

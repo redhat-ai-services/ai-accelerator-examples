@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: {{ include "maas-bootstrap.fullname" . }}
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
 spec:
   clusterResourceWhitelist:
     - group: '*'

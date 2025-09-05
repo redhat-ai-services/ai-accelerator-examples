@@ -3,7 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: 3scale
-  namespace: openshift-gitops
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
 spec:
   project: {{ include "maas-bootstrap.fullname" . }}
   sources:
