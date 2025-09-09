@@ -51,10 +51,6 @@ spec:
                 syncwave: '1'
                 serviceAccount:
                   name: "3scale-status-checker"
-          users:
-          - name: dev1
-            password: openshift
-            service: llama-32-1b-instruct-cpu
     - repoURL: {{ .Values.repoURL }}
       targetRevision: {{ .Values.targetRevision }}
       ref: values

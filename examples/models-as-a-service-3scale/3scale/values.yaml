@@ -28,7 +28,7 @@ apimanagerChecker:
   delay: 5
 
 users:
-  - name: user1
+  - name: dev1
     password: openshift
     service: llama-32-1b-instruct-cpu
     role: admin
