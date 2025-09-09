@@ -31,7 +31,7 @@ To deploy this example, clone this repository and run the bootstrap script from 
 ./bootstrap.sh
 ```
 
-Then select the `models-as-a-service` example from the menu.
+Then select the `models-as-a-service-3scale` example from the menu.
 
 The script will guide you through the following pre-deployment configuration steps:
 

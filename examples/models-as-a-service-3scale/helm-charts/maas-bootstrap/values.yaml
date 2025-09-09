@@ -1,7 +1,7 @@
 # Default values for bootstrap.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-fullnameOverride: "models-as-a-service"
+fullnameOverride: "models-as-a-service-3scale"
 
 # To be overwritten by the main cluster appscript
 clusterDomainUrl: apps.cluster-guid.guid.sandbox.opentlc.com
@@ -10,17 +10,17 @@ targetRevision: main
 
 threeScale:
   namespace: 3scale
-  path: examples/models-as-a-service/3scale
+  path: examples/models-as-a-service-3scale/3scale
   channel: threescale-2.15
   startingCSV: 3scale-operator.v0.12.3
   storageClassName: "ocs-storagecluster-cephfs"
 
 cmsUpload:
-  path: examples/models-as-a-service/3scale-config/cms-upload
-  contextDir: examples/models-as-a-service/3scale-config
+  path: examples/models-as-a-service-3scale/3scale-config/cms-upload
+  contextDir: examples/models-as-a-service-3scale/3scale-config
 
 minio:
-  path: examples/models-as-a-service/minio-instance
+  path: examples/models-as-a-service-3scale/minio-instance
 
 llmaas:
-  path: examples/models-as-a-service/model-serving
+  path: examples/models-as-a-service-3scale/model-serving
