@@ -23,7 +23,7 @@ spec:
         argocd.argoproj.io/sync-options: Prune=false
       labels:
         rhoai-example: {{ include "argocd-appgenerator.fullname" . }}
-        rhoai-example-component: bootstrap-kustomize
+        rhoai-example-component: bootstrap-helm
     spec:
       project: {{ include "argocd-appgenerator.fullname" . }}
       syncPolicy:

@@ -19,10 +19,10 @@ spec:
     database: keycloak
     usernameSecret:
       name: postgres-db
-      key: POSTGRES_USER
+      key: POSTGRESQL_USER
     passwordSecret:
       name: postgres-db
-      key: POSTGRES_PASSWORD
+      key: POSTGRESQL_PASSWORD
   ingress:
     enabled: true
     className: openshift-default

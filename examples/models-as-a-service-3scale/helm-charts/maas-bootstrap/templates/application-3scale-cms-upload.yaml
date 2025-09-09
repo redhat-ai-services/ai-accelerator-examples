@@ -3,7 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cms-upload
-  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  namespace: openshift-gitops
   labels:
     rhoai-example: maas
     rhoai-example-component: bootstrap

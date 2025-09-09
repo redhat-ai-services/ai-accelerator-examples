@@ -224,9 +224,9 @@ metadata:
     rhoai-example-component: redhat-sso-instance
 type: Opaque
 data:
-  POSTGRES_USER: '$(echo -n "redhat-sso" | base64)'
-  POSTGRES_PASSWORD: '$(echo -n $RANDOM | md5sum | head -c 32 | base64)'
-  POSTGRES_DB: '$(echo -n "keycloak" | base64)'
+  POSTGRESQL_USER: '$(echo -n "redhat-sso" | base64)'
+  POSTGRESQL_PASSWORD: '$(echo -n $RANDOM | md5sum | head -c 32 | base64)'
+  POSTGRESQL_DATABASE: '$(echo -n "keycloak" | base64)'
 EOF
     else
         echo "Secret postgres-db already exists in redhat-sso namespace."

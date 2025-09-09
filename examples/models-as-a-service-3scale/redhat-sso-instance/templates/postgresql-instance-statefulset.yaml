@@ -26,23 +26,21 @@ spec:
             - mountPath: /data
               name: postgres-db
           env:
-            - name: POSTGRES_USER
+            - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
                   name: postgres-db
-                  key: POSTGRES_USER
-            - name: POSTGRES_PASSWORD
+                  key: POSTGRESQL_USER
+            - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-db
-                  key: POSTGRES_PASSWORD
-            - name: POSTGRES_DB
+                  key: POSTGRESQL_PASSWORD
+            - name: POSTGRESQL_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: postgres-db
-                  key: POSTGRES_DB
-            - name: PGDATA
-              value: /data/pgdata
+                  key: POSTGRESQL_DATABASE
   volumeClaimTemplates:
     - metadata:
         name: postgres-db

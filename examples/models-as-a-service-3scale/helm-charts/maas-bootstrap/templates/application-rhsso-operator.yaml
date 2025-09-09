@@ -8,7 +8,7 @@ metadata:
     rhoai-example: maas
     rhoai-example-component: bootstrap
 spec:
-  project: models-as-a-service
+  project: {{ include "maas-bootstrap.fullname" . }}
   source:
     repoURL: {{ .Values.repoURL }}
     targetRevision: {{ .Values.targetRevision }}

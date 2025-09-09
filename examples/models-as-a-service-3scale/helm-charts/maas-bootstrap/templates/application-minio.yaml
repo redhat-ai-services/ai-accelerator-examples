@@ -3,9 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: minio
-  namespace: {{ .Values.namespace | default .Release.Namespace }}
-  annotations:
-    argocd.argoproj.io/sync-options: Validate=false
+  namespace: openshift-gitops
   labels:
     rhoai-example: maas
     component: bootstrap

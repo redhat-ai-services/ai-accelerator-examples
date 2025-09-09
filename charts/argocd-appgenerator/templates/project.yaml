@@ -3,6 +3,7 @@ kind: AppProject
 metadata:
   name: {{ include "argocd-appgenerator.fullname" . }}
   labels:
+    rhoai-example: {{ include "argocd-appgenerator.fullname" . }}
     rhoai-example-component: argocd-appgenerator
 spec:
   clusterResourceWhitelist:
