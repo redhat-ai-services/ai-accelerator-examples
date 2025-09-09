@@ -10,3 +10,6 @@ ConfigMapGenerator:
   - name: llama-stack-config
     files:
       - run.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
