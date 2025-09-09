@@ -1,0 +1,107 @@
+# Llama Stack Configuration
+version: '2'
+image_name: vllm
+apis:
+- agents
+- datasetio
+- eval
+- inference
+- safety
+- scoring
+- tool_runtime
+- vector_io
+- telemetry
+models:
+  - metadata: {}
+    model_id: qwen
+    provider_id: vllm
+    provider_model_id: qwen3-8b
+    model_type: llm
+  # - metadata: {}
+  #   model_id: llama-3-2-3b
+  #   provider_id: vllm-llama-3-2-3b
+  #   provider_model_id: llama-3-2-3b
+  #   model_type: llm
+  # - metadata: {}
+  #   model_id: llama-4-scout-17b-16e-w4a16
+  #   provider_id: vllm-llama-4-guard
+  #   provider_model_id: llama-4-scout-17b-16e-w4a16
+  #   model_type: llm
+  # - metadata:
+  #     embedding_dimension: 384
+  #   model_id: all-MiniLM-L6-v2
+  #   provider_id: sentence-transformers
+  #   model_type: embedding
+providers:
+  scoring:
+  - provider_id: basic
+    provider_type: inline::basic
+    config: {}
+  - provider_id: llm-as-judge
+    provider_type: inline::llm-as-judge
+    config: {}
+  agents:
+  - provider_id: meta-reference
+    provider_type: inline::meta-reference
+    config:
+      persistence_store:
+        type: sqlite
+        db_path: ${env.SQLITE_STORE_DIR:=~/.llama/distributions/starter}/agents_store.db
+      responses_store:
+        type: sqlite
+        db_path: ${env.SQLITE_STORE_DIR:=~/.llama/distributions/starter}/responses_store.db
+  inference:
+  - provider_id: vllm
+    provider_type: "remote::vllm"
+    config:
+      url: "https://qwen3-8b.ai-agent-vllm.svc.cluster.local/v1"
+      tls_verify: false
+  - provider_id: sentence-transformers
+    provider_type: inline::sentence-transformers
+  tool_runtime:
+  - provider_id: model-context-protocol
+    provider_type: remote::model-context-protocol
+    config: {}
+  # - provider_id: brave-search
+  #   provider_type: remote::brave-search
+  #   config:
+  #     api_key: brave-search-api-key
+  # - provider_id: tavily-search
+  #   provider_type: remote::tavily-search
+  #   config:
+  #     api_key: ${env.TAVILY_API_KEY}
+  #     max_results: 3
+  # - provider_id: rag-runtime
+  #   provider_type: inline::rag-runtime
+  # telemetry:
+  # - provider_id: meta-reference
+  #   provider_type: inline::meta-reference
+  #   config:
+  #     service_name: ${env.OTEL_SERVICE_NAME:=llama-stack}
+  #     sinks: ${env.TELEMETRY_SINKS:=console, sqlite, otel_metric, otel_trace}
+  #     otel_exporter_otlp_endpoint: ${env.OTEL_EXPORTER_OTLP_ENDPOINT:=}
+  #     sqlite_db_path: ${env.SQLITE_DB_PATH:=~/.llama/distributions/remote-vllm/trace_store.db}
+  # vector_io:
+  # - provider_id: milvus
+  #   provider_type: remote::milvus
+  #   config:
+  #     uri: http://milvus-service.milvus.svc.cluster.local:19530
+  #     token: null
+  #     kvstore:
+  #       type: sqlite
+  #       db_path: ${env.SQLITE_STORE_DIR:=~/.llama/dummy}/milvus_registry.db
+tool_groups:
+# - provider_id: tavily-search
+#   toolgroup_id: builtin::websearch
+- toolgroup_id: mcp::openshift
+  provider_id: model-context-protocol
+  mcp_endpoint:
+    uri: http://kubernetes-mcp.ai-agent-mcp.svc.cluster.local:8080/sse
+# - toolgroup_id: mcp::github
+#   provider_id: model-context-protocol
+#   mcp_endpoint:
+#   uri: http://github-mcp-server.agent-demo.svc.cluster.local:80/sse
+# - toolgroup_id: builtin::rag
+#   provider_id: rag-runtime
+server:
+  port: 8321
