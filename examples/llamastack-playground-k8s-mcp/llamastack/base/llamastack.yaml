@@ -9,17 +9,17 @@ spec:
     containerSpec:
       name: llama-stack
       port: 8321
-      # env:
+      env:
       # - name: LLAMA_3_2_3B_API_TOKEN
       #   valueFrom:
       #     secretKeyRef:
       #       name: llama-3-2-3b
       #       key: apiKey
-      # - name: LLAMA_4_SCOUT_17B_16E_W4A16_API_TOKEN
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: llama-4-scout-17b-16e-w4a16
-      #       key: apiKey
+      - name: LLAMA_4_SCOUT_17B_16E_W4A16_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: llama-4-scout-17b-16e-w4a16
+            key: apiKey
       # - name: TAVILY_API_KEY
       #   valueFrom:
       #     secretKeyRef:

@@ -2,4 +2,4 @@ fullnameOverride: llamastack-playground
 
 llamastack:
   endpointUrl: http://llamastack.ai-agent-lls.svc.cluster.local:8321
-  defaultModel: qwen3-8b
+  defaultModel: llama-4-scout-17b-16e-w4a16
