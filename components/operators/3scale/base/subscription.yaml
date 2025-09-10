@@ -1,0 +1,14 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: 3scale-operator
+spec:
+  channel: threescale-2.15
+  installPlanApproval: Automatic
+  name: redhat-operators
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # config:
+  #   env:
+  #     - name: THREESCALE_DEBUG
+  #       value: "1"
