@@ -6,10 +6,10 @@ namespace: ai-agent-lls
 resources:
   - llamastack.yaml
 
-ConfigMapGenerator:
+configMapGenerator:
   - name: llama-stack-config
     files:
       - run.yaml
 
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - cm-name-replacement.yaml
