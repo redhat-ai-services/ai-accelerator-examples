@@ -10,7 +10,7 @@ apis:
 - scoring
 - tool_runtime
 - vector_io
-- telemetry
+# - telemetry
 models:
   # - metadata: {}
   #   model_id: qwen
