@@ -1,0 +1,5 @@
+fullnameOverride: qwen3-8b
+
+model:
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:qwen3-8b
+  modelNameOverride: qwen3-8b
