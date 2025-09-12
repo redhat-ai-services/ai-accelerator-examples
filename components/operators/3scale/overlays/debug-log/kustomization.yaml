@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../default
+
+patches:
+  - patch: |
+      - op: add
+        path: /spec/config
+        value:
+          env:
+           - name: THREESCALE_DEBUG
+             value: "1"
+    target:
+      kind: Subscription
+      name: 3scale-operator

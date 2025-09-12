@@ -4,8 +4,6 @@ kind: Kustomization
 commonAnnotations:
   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 
-components:
-  - ../../operator/overlays/stable
-  
 resources:
+  - ../../operator/overlays/stable
   - ../../instance/overlays/default

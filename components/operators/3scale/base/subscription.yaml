@@ -8,7 +8,3 @@ spec:
   name: redhat-operators
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  # config:
-  #   env:
-  #     - name: THREESCALE_DEBUG
-  #       value: "1"

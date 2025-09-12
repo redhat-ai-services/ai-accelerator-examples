@@ -8,24 +8,24 @@ metadata:
     rhoai-example: maas
     rhoai-example-component: bootstrap
 spec:
-  project: {{ include "maas-bootstrap.fullname" . }}
+  project: '{{ include "maas-bootstrap.fullname" . }}'
   source:
-    repoURL: {{ .Values.repoURL }}
-    targetRevision: {{ .Values.targetRevision }}
-    path: {{ .Values.cmsUpload.path }}
+    repoURL: '{{ .Values.repoURL }}'
+    targetRevision: '{{ .Values.targetRevision }}'
+    path: '{{ .Values.cmsUpload.path }}'
     helm:
       valuesObject:
         cmsUpload:
-          contextDir: {{ .Values.cmsUpload.contextDir }}/devportal
-          image: {{ .Values.cmsUpload.image }}
-          command: {{ .Values.cmsUpload.command }}
+          contextDir: '{{ .Values.cmsUpload.contextDir }}/devportal'
+          image: '{{ .Values.cmsUpload.image }}'
+          command: '{{ .Values.cmsUpload.command }}'
       parameters:
         - name: clusterDomainUrl
-          value: {{ .Values.clusterDomainUrl }}
+          value: '{{ .Values.clusterDomainUrl }}'
         - name: repoURL
-          value: {{ .Values.repoURL }}
+          value: '{{ .Values.repoURL }}'
         - name: targetRevision
-          value: {{ .Values.targetRevision }}
+          value: '{{ .Values.targetRevision }}'
   destination:
     server: https://kubernetes.default.svc
     namespace: 3scale

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: 3scale-operator
+  name: 3scale
   annotations:
     openshift.io/description: "Red Hat Integration - 3scale"
     openshift.io/display-name: "3scale"

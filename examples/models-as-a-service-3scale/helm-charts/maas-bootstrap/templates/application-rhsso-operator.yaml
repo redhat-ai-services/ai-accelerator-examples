@@ -8,11 +8,11 @@ metadata:
     rhoai-example: maas
     rhoai-example-component: bootstrap
 spec:
-  project: {{ include "maas-bootstrap.fullname" . }}
+  project: '{{ include "maas-bootstrap.fullname" . }}'
   source:
-    repoURL: {{ .Values.repoURL }}
-    targetRevision: {{ .Values.targetRevision }}
-    path: {{ .Values.rhssoOperator.path }}
+    repoURL: '{{ .Values.repoURL }}'
+    targetRevision: '{{ .Values.targetRevision }}'
+    path: '{{ .Values.rhssoOperator.path }}'
   destination:
     server: https://kubernetes.default.svc
     namespace: rhsso

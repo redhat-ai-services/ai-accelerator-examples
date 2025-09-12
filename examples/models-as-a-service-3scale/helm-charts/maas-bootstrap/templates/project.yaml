@@ -1,8 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: {{ include "maas-bootstrap.fullname" . }}
-  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  name: '{{ include "maas-bootstrap.fullname" . }}'
+  namespace: '{{ .Values.namespace | default .Release.Namespace }}'
   labels:
     rhoai-example: maas
     rhoai-example-component: bootstrap
@@ -14,4 +14,4 @@ spec:
     - namespace: '*'
       server: '*'
   sourceRepos:
-    - {{ .Values.repoURL }}
+    - '{{ .Values.repoURL }}'

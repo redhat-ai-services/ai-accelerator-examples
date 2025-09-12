@@ -8,11 +8,11 @@ metadata:
     rhoai-example: maas
     rhoai-example-component: bootstrap
 spec:
-  project: {{ include "maas-bootstrap.fullname" . }}
+  project: '{{ include "maas-bootstrap.fullname" . }}'
   sources:
-    - repoURL: {{ .Values.repoURL }}
-      targetRevision: {{ .Values.targetRevision }}
-      path: {{ .Values.threeScale.path }}
+    - repoURL: '{{ .Values.repoURL }}'
+      targetRevision: '{{ .Values.targetRevision }}'
+      path: '{{ .Values.threeScale.path }}'
       helm:
         parameters:
           - name: clusterDomainUrl
@@ -24,18 +24,18 @@ spec:
         valueFiles:
           - $values/{{ .Values.cmsUpload.contextDir }}/helm-apis-values.yaml
         valuesObject:
-          namespace: {{ .Values.threeScale.namespace }}
+          namespace: '{{ .Values.threeScale.namespace }}'
           operator:
-            channel: {{ .Values.threeScale.channel }}
-            startingCSV: {{ .Values.threeScale.startingCSV }}
+            channel: '{{ .Values.threeScale.channel }}'
+            startingCSV: '{{ .Values.threeScale.startingCSV }}'
             installPlanApproval: Automatic
           apimanager:
-            wildcardDomain: {{ .Values.clusterDomainUrl }}
+            wildcardDomain: '{{ .Values.clusterDomainUrl }}'
             tenantName: maas
             llmMetrics:
               name: llm-metrics
               version: 0.1
-            storageClassName: {{ .Values.threeScale.storageClassName }}
+            storageClassName: '{{ .Values.threeScale.storageClassName }}'
           patcher:
             routes:
               label_selectors:
@@ -47,15 +47,15 @@ spec:
             checks:
               - operatorName: 3scale-operator
                 namespace:
-                  name: {{ .Values.threeScale.namespace }}
+                  name: '{{ .Values.threeScale.namespace }}'
                 syncwave: '1'
                 serviceAccount:
                   name: "3scale-status-checker"
-    - repoURL: {{ .Values.repoURL }}
-      targetRevision: {{ .Values.targetRevision }}
+    - repoURL: '{{ .Values.repoURL }}'
+      targetRevision: '{{ .Values.targetRevision }}'
       ref: values
   destination:
-    namespace: {{ .Values.threeScale.namespace }}
+    namespace: '{{ .Values.threeScale.namespace }}'
     server: https://kubernetes.default.svc
   syncPolicy:
     automated: {}

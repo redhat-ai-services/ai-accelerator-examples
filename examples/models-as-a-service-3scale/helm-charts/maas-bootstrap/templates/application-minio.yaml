@@ -8,11 +8,11 @@ metadata:
     rhoai-example: maas
     component: bootstrap
 spec:
-  project: {{ include "maas-bootstrap.fullname" . }}
+  project: '{{ include "maas-bootstrap.fullname" . }}'
   source:
-    repoURL: {{ .Values.repoURL }}
-    targetRevision: {{ .Values.targetRevision }}
-    path: {{ .Values.minio.path }}
+    repoURL: '{{ .Values.repoURL }}'
+    targetRevision: '{{ .Values.targetRevision }}'
+    path: '{{ .Values.minio.path }}'
   destination:
     server: https://kubernetes.default.svc
     namespace: minio

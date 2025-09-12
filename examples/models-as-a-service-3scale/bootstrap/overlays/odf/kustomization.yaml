@@ -4,12 +4,12 @@ kind: Kustomization
 namespace: openshift-gitops
 
 helmGlobals:
-  chartHome: ../../helm-charts
+  chartHome: ../../../helm-charts
 
 helmCharts:
-  - name: base
+  - name: maas-bootstrap
     releaseName: maas-bootstrap
-    version: 0.1.0
+    valuesFile: values.yaml
 
 patches:
   - path: storageclass-patch.yaml
