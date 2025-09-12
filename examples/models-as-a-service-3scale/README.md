@@ -21,7 +21,6 @@ Before you begin, ensure you have the following:
     *   `git`
     *   `jq`
     *   `yq`
-    *   `podman`
 
 ## Deployment
 

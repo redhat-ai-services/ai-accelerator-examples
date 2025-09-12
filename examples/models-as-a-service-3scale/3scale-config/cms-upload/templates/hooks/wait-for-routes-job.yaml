@@ -32,7 +32,13 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: HOST
-              value: {{ .Values.hook.pre.hostPattern }}
+              value: 'maas-admin.{{ .Values.clusterDomainUrl }}'
             - name: COUNT
               value: "{{ .Values.loop.count }}"
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              memory: 256Mi
+              cpu: 100m
       restartPolicy: Never

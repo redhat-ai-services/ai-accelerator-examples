@@ -130,4 +130,5 @@ We need to do three things here:
 
 SSE support is off by default, toggle the SSE support checkbox to enable
 
+NOTE: When `stream: true` is set in the request, the policy's `rewrite` function automatically ensures that `stream_options.include_usage` and `stream_options.continuous_usage_stats` are set to `true` in the request payload.
 NOTE: Streamed responses will not be buffered, instead being streamed back to the client.

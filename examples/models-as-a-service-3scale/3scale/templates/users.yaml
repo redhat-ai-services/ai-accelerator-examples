@@ -6,11 +6,13 @@ metadata:
   name: {{ .name }}-pwd
   namespace: {{ $.Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 type: Opaque
-stringData:
-  password: {{ .password }}
+data:
+  password: {{ .password | b64enc }}
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: DeveloperAccount
@@ -20,6 +22,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   orgName: "{{ .name }}"
   providerAccountRef:
@@ -33,10 +37,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   username: '{{ .name }}'
-  email: '{{ .name }}@domain.com'
-  role: admin
+  email: '{{ .email }}'
+  role: '{{ .role }}'
   passwordCredentialsRef:
     name: '{{ .name }}-pwd'
   developerAccountRef:

@@ -6,3 +6,5 @@ metadata:
   annotations:
     openshift.io/description: "Red Hat Integration - 3scale"
     openshift.io/display-name: "3scale"
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}

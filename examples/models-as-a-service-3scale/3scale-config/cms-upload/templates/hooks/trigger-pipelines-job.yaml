@@ -35,4 +35,10 @@ spec:
               value: upload-cms
             - name: COUNT
               value: "{{ .Values.loop.count }}"
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              memory: 256Mi
+              cpu: 100m
       restartPolicy: Never

@@ -2,20 +2,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: model-serving 
-  namespace: {{ .Values.namespace | default .Release.Namespace }}
-  annotations:
-    argocd.argoproj.io/sync-options: Validate=false  
+  name: model-serving
+  namespace: openshift-gitops
   labels:
-      component: bootstrap
-      purpose: model-serving
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
 spec:
-  project: {{ include "maas-bootstrap.fullname" . }}
+  project: '{{ include "maas-bootstrap.fullname" . }}'
   source:
-    repoURL: {{ .Values.repoURL }}
-    targetRevision: {{ .Values.targetRevision }}
-    path: {{ .Values.llmaas.path }}
+    repoURL: '{{ .Values.repoURL }}'
+    targetRevision: '{{ .Values.targetRevision }}'
+    path: '{{ .Values.llmaas.path }}'
   destination:
     server: https://kubernetes.default.svc
+    namespace: llm-hosting
   syncPolicy:
     automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true

@@ -1,0 +1,46 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rhsso-instance
+  namespace: openshift-gitops
+  labels:
+    rhoai-example: maas
+    rhoai-example-component: bootstrap
+spec:
+  project: '{{ include "maas-bootstrap.fullname" . }}'
+  source:
+    repoURL: '{{ .Values.repoURL }}'
+    targetRevision: '{{ .Values.targetRevision }}'
+    path: '{{ .Values.rhssoInstance.path }}'
+    helm:
+      parameters:
+        - name: clusterDomainUrl
+          value: '{{ .Values.clusterDomainUrl }}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rhsso
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: postgres-db
+      jsonPointers:
+        - /data
+        - /stringData
+    - group: ""
+      kind: Secret
+      name: minio-s3-auth
+      jsonPointers:
+        - /data/AWS_ACCESS_KEY_ID
+        - /data/AWS_SECRET_ACCESS_KEY
+        - /stringData/AWS_ACCESS_KEY_ID
+        - /stringData/AWS_SECRET_ACCESS_KEY
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data/issuerEndpoint
+        - /stringData/issuerEndpoint

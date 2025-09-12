@@ -3,17 +3,29 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: minio
-  namespace: {{ .Values.namespace | default .Release.Namespace }}
-  annotations:
-    argocd.argoproj.io/sync-options: Validate=false  
+  namespace: openshift-gitops
   labels:
-      component: bootstrap
+    rhoai-example: maas
+    component: bootstrap
 spec:
-  project: {{ include "maas-bootstrap.fullname" . }}
+  project: '{{ include "maas-bootstrap.fullname" . }}'
   source:
-    repoURL: {{ .Values.repoURL }}
-    targetRevision: {{ .Values.targetRevision }}
-    path: {{ .Values.minio.path }}
+    repoURL: '{{ .Values.repoURL }}'
+    targetRevision: '{{ .Values.targetRevision }}'
+    path: '{{ .Values.minio.path }}'
   destination:
     server: https://kubernetes.default.svc
     namespace: minio
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: minio
+      jsonPointers:
+        - /data/AWS_ACCESS_KEY_ID
+        - /data/AWS_SECRET_ACCESS_KEY
+        - /stringData/AWS_ACCESS_KEY_ID
+        - /stringData/AWS_SECRET_ACCESS_KEY

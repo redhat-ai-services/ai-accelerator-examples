@@ -1,0 +1,10 @@
+# Default values for redhat-sso-instance
+namespace: redhat-sso
+keycloak:
+  name: redhat-sso
+  realm:
+    name: 3scale-maas
+    displayName: "MaaS on RHOAI"
+
+# clusterDomainUrl: The cluster apps wildcard domain. If not set or set to the placeholder, a post-install job will try to detect it automatically from Routes.
+clusterDomainUrl: "Needtopatchit"

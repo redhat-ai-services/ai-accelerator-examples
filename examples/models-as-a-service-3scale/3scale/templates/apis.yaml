@@ -8,6 +8,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "4"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   name: "{{ .name }}"
   systemName: "{{ .name }}"
@@ -23,6 +25,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   name: "{{ .name }}"
   systemName: "{{ .name }}"
@@ -52,6 +56,9 @@ spec:
   providerAccountRef:
     name: 3scale-maas-tenant-secret
 ---
+# The 3scale operator is not evaluating the `skipSwagValidator` flag.
+# Validate the API definition here: https://editor.swagger.io
+# See https://issues.redhat.com/browse/THREESCALE-11842 for more details
 apiVersion: capabilities.3scale.net/v1beta1
 kind: ActiveDoc
 metadata:
@@ -60,34 +67,41 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "6"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   name: "{{ .name }}"
+  systemName: {{ include "3scale.systemName" .name }}
   activeDocOpenAPIRef:
-    url: {{ .activeDocOpenAPIRef }}
+{{- if .activeDocOpenAPIRefUrl }}
+    url: {{ .activeDocOpenAPIRefUrl }}
+{{- else }}
+    secretRef:
+      name: {{ .name }}-activedoc
+{{- end }}
   skipSwaggerValidations: true
   productSystemName: {{ .name }}
   published: true
   providerAccountRef:
     name: 3scale-maas-tenant-secret
-# Creating an application is failing with ArgoCD because it needs proper waiting
-# time for DeveloperAccount and DeveloperUser to be created.
-# ---
-# apiVersion: capabilities.3scale.net/v1beta1
-# kind: Application
-# metadata:
-#   name: {{ .name }}
-#   namespace: {{ $.Values.namespace }}
-#   annotations:
-#     argocd.argoproj.io/sync-wave: "8"
-#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-# spec:
-#   name: {{ .name }}
-#   description: "Default application for {{ .name }}"
-#   applicationPlanName: standard
-#   productCR:
-#     name: {{ .name }}
-#   accountCR:
-#     name: {{ .name }}
+---
+{{- $activeDocOpenAPIFile := .activeDocOpenAPIFile | default "" }}
+{{- if $activeDocOpenAPIFile }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .name }}-activedoc
+  namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
+type: Opaque
+data:
+{{- if eq (trimSuffix ".json" $activeDocOpenAPIFile) $activeDocOpenAPIFile }}
+  openapi.json: '{{ .Files.Get .activeDocOpenAPIFile | b64enc }}'
+{{- else }}
+  openapi.yaml: '{{ .Files.Get .activeDocOpenAPIFile | b64enc }}'
+{{- end }}
+{{- end }}
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: ProxyConfigPromote
@@ -97,6 +111,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "9"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   productCRName: {{ .name }}
   production: true

@@ -5,6 +5,8 @@ kind: OperatorGroup
 metadata:
   name: {{ .Values.operator.name }}-group
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   targetNamespaces:
     - {{ .Values.namespace }}
@@ -14,6 +16,8 @@ kind: Subscription
 metadata:
   name: {{ .Values.operator.name }}
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   channel: {{ .Values.operator.channel }}
   installPlanApproval: {{ .Values.operator.installPlanApproval }}
@@ -23,4 +27,8 @@ spec:
   {{- if .Values.operator.startingCSV }}
   startingCSV: {{ .Values.operator.startingCSV }}
   {{- end }}
+  # config:
+  #   env:
+  #     - name: THREESCALE_DEBUG
+  #       value: "1"
 {{- end }}
