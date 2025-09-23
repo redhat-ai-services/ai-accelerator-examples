@@ -1,4 +1,4 @@
-fullnameOverride: granite
+fullnameOverride: granite-guardian
 
 deploymentMode: RawDeployment
 
