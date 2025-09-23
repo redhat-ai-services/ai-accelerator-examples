@@ -10,3 +10,9 @@ configMapGenerator:
   - name: guardrails-gateway-config
     files:
       - config.yaml=gateway-config.yaml
+  - name: guardrails-orchestrator-config
+    files:
+      - config.yaml=orchestrator-config.yaml
+
+configurations:
+  - cm-name-replacement.yaml
