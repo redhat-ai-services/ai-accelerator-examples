@@ -1,0 +1,9 @@
+fullnameOverride: granite
+
+deploymentMode: RawDeployment
+
+model:
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:llama-3.1-8B-Instruct
+  args:
+    - "--gpu-memory-utilization=0.95"
+    - "--max-model-len=20000"

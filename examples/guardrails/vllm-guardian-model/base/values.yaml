@@ -1,0 +1,9 @@
+fullnameOverride: granite
+
+deploymentMode: RawDeployment
+
+model:
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:granite-guardian-3.3-8b
+  args:
+    - "--gpu-memory-utilization=0.95"
+    - "--max-model-len=20000"
