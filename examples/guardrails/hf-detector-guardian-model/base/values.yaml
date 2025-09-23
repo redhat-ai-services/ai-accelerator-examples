@@ -1,0 +1,4 @@
+fullnameOverride: granite-guardian
+
+model:
+  uri: oci://quay.io/redhat-ai-services/modelcar-catalog:granite-guardian-hap-38m

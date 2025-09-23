@@ -4,4 +4,9 @@ kind: Kustomization
 namespace: guardrails
 
 resources:
-  - 
+  - guardrails-orchestrator.yaml
+
+configMapGenerator:
+  - name: guardrails-gateway-config
+    files:
+      - config.yaml=gateway-config.yaml

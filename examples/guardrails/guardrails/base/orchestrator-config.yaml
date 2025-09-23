@@ -1,0 +1,6 @@
+chat_generation:
+  service:
+    hostname: granite-predictor.guardrails.svc.cluster.local
+    port: 80
+detectors:
+  

@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: guardrails
 
 helmCharts:
-- name: vllm-kserve
-  releaseName: granite
+- name: guardrails-hf-detector-kserve
+  releaseName: granite-guardian
   version: 0.5.11
   repo: https://redhat-ai-services.github.io/helm-charts/
   valuesFile: values.yaml
