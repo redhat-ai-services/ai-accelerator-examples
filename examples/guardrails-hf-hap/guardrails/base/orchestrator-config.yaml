@@ -1,7 +1,7 @@
 chat_generation:
   service:
-    hostname: granite-predictor.guardrails-hf-hap.svc.cluster.local
-    port: 80
+    hostname: granite-guardrails-hf-hap.apps.cluster-6vvfv.6vvfv.sandbox606.opentlc.com 
+    port: 443
 detectors:
   hap:
     type: text_contents
