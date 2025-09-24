@@ -1,12 +1,12 @@
 chat_generation:
   service:
-    hostname: granite-predictor.guardrails.svc.cluster.local
+    hostname: granite-predictor.guardrails-hf-hap.svc.cluster.local
     port: 80
 detectors:
   hap:
     type: text_contents
     service:
-      hostname: granite-guardian-predictor.test.svc.cluster.local
+      hostname: granite-guardian-predictor.guardrails-hf-hap.svc.cluster.local
       port: 8000
     chunker_id: whole_doc_chunker
     default_threshold: 0.5
