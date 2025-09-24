@@ -6,6 +6,6 @@ namespace: guardrails
 helmCharts:
 - name: guardrails-hf-detector-kserve
   releaseName: granite-guardian
-  version: 0.1.2
+  version: 0.1.3
   repo: https://redhat-ai-services.github.io/helm-charts/
   valuesFile: values.yaml
