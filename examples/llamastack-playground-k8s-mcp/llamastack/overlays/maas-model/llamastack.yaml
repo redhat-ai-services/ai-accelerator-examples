@@ -1,0 +1,14 @@
+---
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: llamastack
+spec:
+  server:
+    containerSpec:
+      env:
+      - name: LLAMA_4_SCOUT_17B_16E_W4A16_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: llama-4-scout-17b-16e-w4a16
+            key: apiKey

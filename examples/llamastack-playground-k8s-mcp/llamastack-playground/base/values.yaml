@@ -1,0 +1,5 @@
+fullnameOverride: llamastack-playground
+
+llamastack:
+  endpointUrl: http://llamastack-service.ai-agent-lls.svc.cluster.local:8321
+  defaultModel: Qwen/Qwen3-8B

@@ -1,0 +1,55 @@
+# Llama Stack Configuration
+version: '2'
+image_name: vllm
+apis:
+  - agents
+  - datasetio
+  - eval
+  - inference
+  - safety
+  - scoring
+  - tool_runtime
+  - vector_io
+models:
+  - metadata: {}
+    model_id: qwen
+    provider_id: vllm
+    provider_model_id: Qwen/Qwen3-8B
+    model_type: llm
+providers:
+  scoring:
+    - provider_id: basic
+      provider_type: inline::basic
+      config: {}
+    - provider_id: llm-as-judge
+      provider_type: inline::llm-as-judge
+      config: {}
+  agents:
+    - provider_id: meta-reference
+      provider_type: inline::meta-reference
+      config:
+        persistence_store:
+          type: sqlite
+          db_path: ${env.SQLITE_STORE_DIR:=~/.llama/distributions/starter}/agents_store.db
+        responses_store:
+          type: sqlite
+          db_path: ${env.SQLITE_STORE_DIR:=~/.llama/distributions/starter}/responses_store.db
+  inference:
+    - provider_id: vllm
+      provider_type: "remote::vllm"
+      config:
+        url: "http://qwen3-8b-predictor.ai-agent-vllm.svc.cluster.local:8080/v1"
+        tls_verify: false
+    - provider_id: sentence-transformers
+      provider_type: inline::sentence-transformers
+  tool_runtime:
+    - provider_id: model-context-protocol
+      provider_type: remote::model-context-protocol
+      config: {}
+tool_groups:
+  - toolgroup_id: mcp::openshift
+    provider_id: model-context-protocol
+    mcp_endpoint:
+      uri: http://kubernetes-mcp.ai-agent-mcp.svc.cluster.local:8080/sse
+server:
+  port: 8321

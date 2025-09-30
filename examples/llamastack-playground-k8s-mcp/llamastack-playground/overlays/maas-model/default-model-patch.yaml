@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llamastack-playground
+spec:
+  template:
+    spec:
+      containers:
+        - name: llamastack-playground
+          env:
+            - name: DEFAULT_MODEL
+              value: llama-4-scout-17b-16e-w4a16
