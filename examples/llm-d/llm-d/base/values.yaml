@@ -1,0 +1,18 @@
+fullnameOverride: gpt-oss-20b
+
+model:
+  name: openai/gpt-oss-20b
+  uri: oci://registry.redhat.io/rhelai1/modelcar-gpt-oss-20b:1.5
+
+vllm:
+  additionalArguments:
+    - --max-model-len=2000
+  resources:
+    requests:
+      cpu: 2
+      memory: 8Gi
+      nvidia.com/gpu: 1
+    limits:
+      cpu: 8
+      memory: 24Gi
+      nvidia.com/gpu: 1
