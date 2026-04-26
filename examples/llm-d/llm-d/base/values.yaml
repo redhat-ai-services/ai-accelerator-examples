@@ -4,6 +4,9 @@ model:
   name: openai/gpt-oss-20b
   uri: oci://registry.redhat.io/rhelai1/modelcar-gpt-oss-20b:1.5
 
+hardwareProfile:
+  name: nvidia-gpu-serving
+
 vllm:
   additionalArguments:
     - --max-model-len=2000
