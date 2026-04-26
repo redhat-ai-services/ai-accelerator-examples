@@ -12,10 +12,10 @@ vllm:
     - --max-model-len=2000
   resources:
     requests:
-      cpu: 2
+      cpu: '2'
       memory: 8Gi
-      nvidia.com/gpu: 1
+      nvidia.com/gpu: '1'
     limits:
-      cpu: 8
+      cpu: '8'
       memory: 24Gi
-      nvidia.com/gpu: 1
+      nvidia.com/gpu: '1'
