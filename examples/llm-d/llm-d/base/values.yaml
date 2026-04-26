@@ -7,6 +7,11 @@ model:
 hardwareProfile:
   name: nvidia-gpu-serving
 
+auth:
+  enabled: true
+  serviceAccounts:
+    - name: my-model-service
+
 vllm:
   additionalArguments:
     - --max-model-len=2000
