@@ -14,7 +14,7 @@ auth:
 
 vllm:
   additionalArguments:
-    - --max-seq-len=35
+    - --max-num-seqs=35
   resources:
     requests:
       cpu: '2'
