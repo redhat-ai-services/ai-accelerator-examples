@@ -5,6 +5,6 @@ helmCharts:
   - name: llm-d-kserve
     releaseName: gpt-oss-20b
     namespace: llm-d-example
-    version: 0.2.0
+    version: 0.2.1
     repo: https://redhat-ai-services.github.io/helm-charts/
     valuesFile: values.yaml
