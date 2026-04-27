@@ -8,7 +8,7 @@ hardwareProfile:
   name: nvidia-gpu-serving
 
 auth:
-  enabled: false
+  enabled: true
   serviceAccounts:
     - name: my-model-service
 
